@@ -1,0 +1,1589 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Carol + Helder — Guardiões da Nossa Casa 🐾</title>
+  <meta name="theme-color" content="#0f111a" />
+  <style>
+    :root{
+      --bg0:#090b12;
+      --bg1:#0f1324;
+      --bg2:#141a35;
+      --ink:#eef3ff;
+      --muted:#b6c0e8;
+      --accent:#ffb3d9;
+      --accent2:#9cffd7;
+      --gold:#ffe58a;
+      --danger:#ff6b8b;
+      --shadow: rgba(0,0,0,.40);
+      --stroke: rgba(255,255,255,.14);
+      --glass: rgba(255,255,255,.06);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 30% 20%, #1a2146 0%, #0b0f18 45%, #070a12 100%);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      overflow:hidden;
+      touch-action:none;
+    }
+
+    #wrap{ position:relative; width:100%; height:100%; }
+    canvas{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display:block;
+    }
+
+    .hud{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 14px max(14px, env(safe-area-inset-left));
+      gap:12px;
+    }
+
+    .badge{
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:10px 12px;
+      box-shadow: 0 12px 30px var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      max-width:min(560px, 96vw);
+    }
+    .title{
+      display:flex; align-items:center; gap:10px;
+      font-weight:850; letter-spacing:.2px;
+      line-height:1.1; font-size:14px;
+      color:var(--ink);
+    }
+    .title small{ font-weight:700; color:var(--muted); opacity:.95; }
+    .sub{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .kbd{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:8px;
+      font-size:11px;
+      color:rgba(238,243,255,.85);
+    }
+    .key{
+      padding:2px 8px;
+      border-radius:9px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress{
+      margin-left:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+      max-width:min(360px, 48vw);
+    }
+    .bar{
+      width:min(340px, 50vw);
+      height:12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      overflow:hidden;
+      box-shadow: 0 12px 30px var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--gold));
+      border-radius:999px;
+      filter: saturate(1.1);
+      box-shadow: 0 0 18px rgba(255,179,217,.35);
+    }
+    .mini{
+      font-size:11px;
+      color:var(--muted);
+      text-align:right;
+      opacity:.95;
+    }
+
+    .dialog{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: max(18px, env(safe-area-inset-bottom));
+      width:min(940px, 94vw);
+      pointer-events:none;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:stretch;
+      z-index:9;
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:18px;
+      padding:14px 14px 12px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow:hidden;
+      position:relative;
+    }
+    .panel:before{
+      content:"";
+      position:absolute; inset:-40px;
+      background:
+        radial-gradient(420px 140px at 25% 20%, rgba(255,179,217,.12), transparent 60%),
+        radial-gradient(420px 140px at 70% 85%, rgba(156,255,215,.10), transparent 60%);
+      pointer-events:none;
+    }
+    .who{ display:flex; align-items:center; gap:10px; position:relative; }
+    .tag{
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.25px;
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color:rgba(238,243,255,.92);
+    }
+    .tag.carol{ box-shadow: 0 0 0 1px rgba(255,179,217,.12) inset; }
+    .tag.helder{ box-shadow: 0 0 0 1px rgba(156,255,215,.12) inset; }
+    .hint{ margin-left:auto; color:rgba(238,243,255,.72); font-size:12px; }
+    .text{
+      margin-top:10px;
+      font-size:14px;
+      line-height:1.5;
+      color:rgba(238,243,255,.92);
+      position:relative;
+      white-space:pre-wrap;
+    }
+
+    .overlay{
+      position:absolute; inset:0;
+      display:none;
+      place-items:center;
+      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+      background:
+        radial-gradient(1200px 800px at 50% 30%, rgba(255,179,217,.12), transparent 55%),
+        radial-gradient(1200px 800px at 60% 60%, rgba(156,255,215,.10), transparent 60%),
+        rgba(0,0,0,.58);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index:20;
+    }
+    .sheet{
+      width:min(960px, 96vw);
+      max-height:min(82vh, 980px);
+      overflow:auto;
+      background: linear-gradient(180deg, rgba(20,22,38,.95), rgba(14,16,28,.95));
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:22px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.62);
+      padding:18px 18px 16px;
+      position:relative;
+    }
+    .sheet h1{ margin:0 0 10px 0; font-size:18px; letter-spacing:.2px; }
+    .sheet p{ margin:0; color:rgba(238,243,255,.92); line-height:1.6; font-size:14px; white-space:pre-wrap; }
+    .actions{
+      margin-top:14px;
+      display:flex; gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .btn{
+      pointer-events:auto;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color:rgba(238,243,255,.94);
+      padding:9px 12px;
+      border-radius:14px;
+      font-weight:850;
+      cursor:pointer;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 14px 40px rgba(0,0,0,.35);
+      transition: transform .12s ease, background .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(255,179,217,.18), rgba(156,255,215,.16));
+      border-color: rgba(255,255,255,.22);
+    }
+    .btn.danger{
+      background: rgba(255,107,139,.12);
+      border-color: rgba(255,107,139,.35);
+    }
+
+    /* Mobile controls */
+    .touch{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding: 10px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      display:none;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      pointer-events:none;
+      z-index:12;
+    }
+    .pad{ display:flex; gap:10px; align-items:flex-end; pointer-events:none; }
+    .tbtn{
+      pointer-events:auto;
+      width:56px; height:56px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color:rgba(238,243,255,.94);
+      font-weight:950;
+      font-size:18px;
+      display:grid; place-items:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action:none;
+    }
+    .tbtn.big{ width:66px; height:66px; border-radius:22px; font-size:20px; }
+    .tbtn.heart{
+      width:66px; height:66px;
+      background: linear-gradient(180deg, rgba(255,179,217,.14), rgba(156,255,215,.10));
+    }
+    .tbtn:active{ transform: translateY(1px) scale(.99); }
+
+    @media (pointer:coarse){
+      .touch{ display:flex; }
+      .kbd{ display:none; }
+      .sub{ max-width: 60vw; }
+    }
+    @media (max-width:520px){
+      .hud{ flex-direction:column; align-items:stretch; }
+      .progress{ align-items:flex-start; max-width:100%; }
+      .mini{ text-align:left; }
+      .bar{ width:min(520px, 92vw); }
+    }
+  </style>
+</head>
+
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div class="badge">
+      <div class="title">🐾 Carol + Helder <small>— guardiões da nossa casa</small></div>
+      <div class="sub" id="subText">
+        Segue a Carol, lê as placas… e quando chegares à porta, entra. Lá dentro, protegemos tudo juntos.
+      </div>
+      <div class="kbd">
+        <span class="key">← →</span> ou <span class="key">A D</span> andar
+        <span class="key">↑</span>/<span class="key">W</span>/<span class="key">Espaço</span> saltar (segura para salto maior)
+        <span class="key">↓</span> interagir/ler/entrar
+        <span class="key">C</span> cuddle
+        <span class="key">R</span> recomeçar
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="bar" aria-label="Progresso"><i id="barFill"></i></div>
+      <div class="mini" id="miniText">Placas: 0 / 7 • Corações: 0 • Cena: Exterior</div>
+    </div>
+  </div>
+
+  <div class="dialog" id="dialog" style="display:none">
+    <div class="panel">
+      <div class="who">
+        <span class="tag" id="speakerTag">Placa</span>
+        <span class="hint" id="hintText">↓ para interagir • ↑ para fechar</span>
+      </div>
+      <div class="text" id="dialogText"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="letter">
+    <div class="sheet">
+      <h1>🏡 A nossa casa (e eu ao teu lado)</h1>
+      <p id="letterText"></p>
+      <div class="actions">
+        <button class="btn" id="copyBtn">Copiar carta</button>
+        <button class="btn primary" id="againBtn">Jogar outra vez</button>
+        <button class="btn danger" id="closeBtn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="touch" id="touch">
+    <div class="pad">
+      <div class="tbtn" data-k="left">←</div>
+      <div class="tbtn" data-k="right">→</div>
+      <div class="tbtn big" data-k="jump">↑</div>
+    </div>
+    <div class="pad">
+      <div class="tbtn heart" data-k="interact">💬</div>
+      <div class="tbtn heart" data-k="cuddle">🤍</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ===========================================
+  //  Carol + Helder — Guardians of Our Home 🐾
+  //  Single-file: exterior platform + interior
+  //  PC + mobile, cozy dialogue + cuddle
+  // ===========================================
+
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d', { alpha: true });
+
+  const barFill = document.getElementById('barFill');
+  const miniText = document.getElementById('miniText');
+  const dialog = document.getElementById('dialog');
+  const dialogText = document.getElementById('dialogText');
+  const speakerTag = document.getElementById('speakerTag');
+  const hintText = document.getElementById('hintText');
+  const subText = document.getElementById('subText');
+
+  const letter = document.getElementById('letter');
+  const letterText = document.getElementById('letterText');
+  const copyBtn = document.getElementById('copyBtn');
+  const againBtn = document.getElementById('againBtn');
+  const closeBtn = document.getElementById('closeBtn');
+
+  const touch = document.getElementById('touch');
+
+  // ----- Letter (pt-PT, mais natural, mais “seguro”)
+  const FULL_LETTER =
+`Carol,
+
+Eu pensei com calma no que aconteceu.
+
+Eu percebi uma coisa simples: quando tu estás a sentir algo, o meu primeiro trabalho não é “resolver” — é respeitar e estar presente.
+
+Se eu te fiz sentir pressionada, pouco ouvida, ou como se tivesses de gerir as minhas reações… eu lamento mesmo.
+Não quero que o teu amor tenha de carregar o meu peso.
+
+Eu quero ser um lugar seguro para ti.
+Quero ouvir sem discutir.
+Quero abrandar sem fugir.
+Quero assumir sem dramatizar.
+
+E quero cuidar do que é nosso — da nossa casa, do nosso espaço, do teu conforto — comigo ao teu lado, sem te empurrar, sem te apressar.
+
+Estou aqui.
+Com carinho, com cuidado, e com compromisso.
+
+Helder 🐾`;
+
+  // Placas (exterior) — curto, mais vivo, com a Carol a guiar
+  const PLAQUES = [
+    { who:'Carol',  text:'Ok… vem comigo. 🐾\nHoje não é sobre “ter razão”.\nÉ sobre chegarmos a casa em paz.' },
+    { who:'Helder', text:'Eu estive a pensar.\nE eu percebi que falhei na parte mais importante: respeitar o que estavas a sentir.' },
+    { who:'Carol',  text:'Não precisas de te castigar.\nPrecisas é de aprender a ficar.\nSem acelerar. Sem virar isto contra ti.' },
+    { who:'Helder', text:'Tens razão.\nEu não quero discutir sentimentos.\nQuero ouvir… e estar contigo de forma segura.' },
+    { who:'Carol',  text:'Se estiveres aqui de verdade,\nsem pressão… eu consigo respirar.' },
+    { who:'Helder', text:'Eu vou abrandar.\nE quando eu escorregar, eu não vou “compensar” com piadas.\nVou pedir desculpa como deve ser.' },
+    { who:'Carol',  text:'Boa.\nAgora… a porta está ali.\nQuando estiveres pronto, entramos.\nE lá dentro, protegemos tudo juntos.' },
+  ];
+
+  // ----- World / Scenes
+  const SCENE = {
+    OUT: 'EXTERIOR',
+    IN:  'INTERIOR'
+  };
+
+  const WORLDS = {
+    [SCENE.OUT]: { w: 4200, h: 720, gravity: 0.48, friction: 0.84, air: 0.93 },
+    [SCENE.IN]:  { w: 1400, h: 720, gravity: 0.46, friction: 0.86, air: 0.94 }
+  };
+
+  let scene = SCENE.OUT;
+
+  // Pixel scaling
+  let DPR = Math.min(2, window.devicePixelRatio || 1);
+  let VW = 960, VH = 540;
+
+  function resize(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+
+    const targetShort = Math.min(w, h);
+    const base = targetShort < 520 ? 360 : 480;
+    const aspect = w / h;
+
+    VH = Math.round(base);
+    VW = Math.round(base * aspect);
+
+    canvas.width  = Math.floor(VW * DPR);
+    canvas.height = Math.floor(VH * DPR);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.imageSmoothingEnabled = false;
+  }
+  window.addEventListener('resize', resize, {passive:true});
+  resize();
+
+  // ----- Input
+  const keys = new Set();
+  const pressed = new Set();
+  let pointerDown = false;
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    keys.add(k);
+    pressed.add(k);
+    if (['arrowleft','arrowright','arrowup','arrowdown',' '].includes(e.key)) e.preventDefault();
+  }, {passive:false});
+
+  window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()), {passive:true});
+
+  function bindTouchButtons(){
+    const map = {
+      left:     ['arrowleft','a'],
+      right:    ['arrowright','d'],
+      jump:     ['arrowup','w',' '],
+      interact: ['arrowdown','s','enter'],
+      cuddle:   ['c']
+    };
+    touch.querySelectorAll('.tbtn').forEach(btn => {
+      const code = btn.getAttribute('data-k');
+      const setDown = () => {
+        pointerDown = true;
+        for(const k of map[code]) keys.add(k);
+        if (code === 'jump') pressed.add(' ');
+        if (code === 'interact') pressed.add('arrowdown');
+        if (code === 'cuddle') pressed.add('c');
+      };
+      const setUp = () => {
+        pointerDown = false;
+        for(const k of map[code]) keys.delete(k);
+      };
+      btn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); btn.setPointerCapture(e.pointerId); setDown(); }, {passive:false});
+      btn.addEventListener('pointerup', (e)=>{ e.preventDefault(); setUp(); }, {passive:false});
+      btn.addEventListener('pointercancel', setUp, {passive:true});
+      btn.addEventListener('pointerleave', ()=>{ if(pointerDown) setUp(); }, {passive:true});
+    });
+  }
+  bindTouchButtons();
+
+  // ----- Utils
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const lerp  = (a,b,t)=>a+(b-a)*t;
+  const rand  = (a,b)=>a+Math.random()*(b-a);
+
+  // ----- Camera
+  const cam = { x:0, y:0, shake:0, fade:0, fadeTo:0 };
+
+  // ----- Audio (mini “music loop” sem ficheiros externos)
+  let audioCtx = null;
+  let audioOn = false;
+
+  function ensureAudio(){
+    if(audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  function beep(freq=660, dur=0.06, type='sine', gain=0.03){
+    if(!audioOn) return;
+    try{
+      ensureAudio();
+      const t0 = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0);
+      o.stop(t0 + dur + 0.02);
+    }catch(e){}
+  }
+
+  // soft cozy loop
+  let musicTimer = 0;
+  const musicPattern = [
+    {f:392, d:0.08, t:'triangle', g:0.012},
+    {f:494, d:0.08, t:'triangle', g:0.010},
+    {f:587, d:0.10, t:'sine',     g:0.010},
+    {f:494, d:0.08, t:'triangle', g:0.010},
+    {f:392, d:0.10, t:'sine',     g:0.009},
+    {f:330, d:0.10, t:'triangle', g:0.009},
+    {f:294, d:0.12, t:'sine',     g:0.008},
+    {f:330, d:0.10, t:'triangle', g:0.009},
+  ];
+  let musicIndex = 0;
+
+  window.addEventListener('pointerdown', () => {
+    if(audioOn) return;
+    audioOn = true;
+    beep(440, 0.04, 'triangle', 0.02);
+  }, {once:true, passive:true});
+
+  // ----- Dialogue state
+  let activePlaque = null;
+  let showDialog = false;
+  let letterOpen = false;
+
+  function openDialog(who, text, hint='↑ para fechar'){
+    showDialog = true;
+    dialog.style.display = '';
+    speakerTag.textContent = who === 'Carol' ? 'Carol 🐾' : 'Helder 🐾';
+    speakerTag.className = 'tag ' + (who === 'Carol' ? 'carol' : 'helder');
+    hintText.textContent = hint;
+    dialogText.textContent = text;
+  }
+  function closeDialog(){
+    showDialog = false;
+    dialog.style.display = 'none';
+    activePlaque = null;
+  }
+
+  function openLetter(){
+    letterOpen = true;
+    letter.style.display = 'grid';
+    letterText.textContent = FULL_LETTER;
+    beep(523,0.06,'triangle',0.02);
+    beep(784,0.07,'sine',0.02);
+    beep(988,0.07,'sine',0.02);
+  }
+  function closeLetter(){
+    letterOpen = false;
+    letter.style.display = 'none';
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(FULL_LETTER);
+      copyBtn.textContent = 'Copiado ✅';
+      setTimeout(()=>copyBtn.textContent='Copiar carta', 1200);
+      beep(990,0.05,'triangle',0.02);
+    }catch{
+      copyBtn.textContent = 'Não deu (browser) 😿';
+      setTimeout(()=>copyBtn.textContent='Copiar carta', 1400);
+    }
+  });
+
+  againBtn.addEventListener('click', () => restart());
+  closeBtn.addEventListener('click', () => closeLetter());
+
+  // ----- Entities
+  function makeCat(name, colorA, colorB){
+    return {
+      name,
+      x: 110, y: 460,
+      w: 26, h: 18,
+      vx: 0, vy: 0,
+      dir: 1,
+      onGround: false,
+      step: 0,
+      blush: 0,
+      sparkle: 0,
+      hearts: 0,
+
+      // better jump feel
+      coyote: 0,
+      jumpBuf: 0,
+      jumpHold: 0,
+      canCut: false
+    };
+  }
+
+  const carol  = makeCat('Carol',  '#ffb3d9', '#ffd7ea');
+  const helder = makeCat('Helder', '#9cffd7', '#c9ffef');
+  carol.x = 180;
+  helder.x = 130;
+
+  // Carol AI (lead)
+  const lead = { targetSpeed: 1.05, pause: 0, state:'walk' };
+
+  // ----- Exterior content
+  const exterior = {
+    platforms: [
+      {x:0, y:520, w:900, h:220},
+      {x:900, y:520, w:650, h:220},
+      {x:1550, y:520, w:620, h:220},
+      {x:2170, y:520, w:520, h:220},
+      {x:2690, y:520, w:700, h:220},
+      {x:3390, y:520, w:810, h:220},
+
+      {x:520, y:430, w:180, h:30},
+      {x:770, y:390, w:160, h:30},
+      {x:1040,y:420, w:180, h:30},
+
+      {x:1460,y:420, w:180, h:30},
+      {x:1680,y:372, w:170, h:30},
+      {x:1920,y:408, w:170, h:30},
+
+      {x:2300,y:432, w:180, h:30},
+      {x:2520,y:392, w:160, h:30},
+
+      {x:2960,y:420, w:200, h:30},
+      {x:3220,y:372, w:200, h:30},
+
+      {x:3600,y:432, w:180, h:30},
+      {x:3820,y:392, w:180, h:30}
+    ],
+    house: { x: 3840, y: 520, w: 260, h: 176 },
+    plaques: [],
+    decor: [],
+    particles: []
+  };
+
+  // plaques spacing
+  const plaqueSpacing = (WORLDS[SCENE.OUT].w-540) / (PLAQUES.length);
+  for(let i=0;i<PLAQUES.length;i++){
+    exterior.plaques.push({
+      id:i,
+      x: 280 + i*plaqueSpacing + rand(-35,35),
+      y: 520,
+      w: 26, h: 40,
+      read:false,
+      glow:0
+    });
+  }
+
+  // decor
+  for(let i=0;i<48;i++){
+    const x = i*90 + rand(-20,20);
+    exterior.decor.push({
+      kind: Math.random()<0.6?'tree':'bush',
+      x: clamp(x, 10, WORLDS[SCENE.OUT].w-10),
+      y: 520,
+      s: rand(0.85,1.6),
+      seed: rand(0,999)
+    });
+  }
+  for(let i=0;i<130;i++){
+    exterior.decor.push({ kind:'flower', x: rand(0, WORLDS[SCENE.OUT].w), y: 520, s: rand(0.7,1.3), seed: rand(0,999) });
+  }
+
+  // particles
+  function spawnParticles(arr, count, worldW){
+    for(let i=0;i<count;i++){
+      arr.push({
+        x: rand(0, worldW),
+        y: rand(40, 320),
+        vx: rand(-0.25,0.25),
+        vy: rand(-0.08,0.08),
+        t: rand(0,999),
+        kind: Math.random()<0.6 ? 'firefly' : (Math.random()<0.65 ? 'petal' : 'spark'),
+        seed: rand(0,999)
+      });
+    }
+  }
+  spawnParticles(exterior.particles, 120, WORLDS[SCENE.OUT].w);
+
+  // ----- Interior content (NEW scene)
+  const interior = {
+    platforms: [
+      {x:0, y:540, w:WORLDS[SCENE.IN].w, h:220}, // floor
+      {x:0, y:0, w:WORLDS[SCENE.IN].w, h:40},    // ceiling (soft constraint via collisions)
+      {x:-20,y:0,w:20,h:WORLDS[SCENE.IN].h},     // left wall
+      {x:WORLDS[SCENE.IN].w,y:0,w:20,h:WORLDS[SCENE.IN].h} // right wall
+    ],
+    // interactive “furniture” zones
+    spots: {
+      sofa:  { x: 520, y: 540, w: 180, h: 80 },
+      bed:   { x: 980, y: 540, w: 220, h: 80 },
+      shelf: { x: 240, y: 540, w: 140, h: 120 },
+      fire:  { x: 120, y: 540, w: 100, h: 120 }
+    },
+    // a “home aura” (protective) progress
+    protect: 0, // 0..1
+    particles: []
+  };
+  spawnParticles(interior.particles, 90, WORLDS[SCENE.IN].w);
+
+  // ----- Game progress
+  let readCount = 0;
+  let cuddleCount = 0;
+  let doorUnlocked = false;
+
+  // ----- UI text
+  function sceneLabel(){ return scene === SCENE.OUT ? 'Exterior' : 'Interior'; }
+
+  // ----- Physics helpers
+  function aabb(ax,ay,aw,ah, bx,by,bw,bh){
+    return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+  }
+
+  function worldNow(){ return WORLDS[scene]; }
+  function platformsNow(){
+    return scene === SCENE.OUT ? exterior.platforms : interior.platforms;
+  }
+
+  function resolveEntity(e){
+    const W = worldNow();
+    e.onGround = false;
+
+    e.x += e.vx;
+    for(const p of platformsNow()){
+      if(aabb(e.x, e.y, e.w, e.h, p.x, p.y, p.w, p.h)){
+        if(e.vx > 0) e.x = p.x - e.w;
+        if(e.vx < 0) e.x = p.x + p.w;
+        e.vx = 0;
+      }
+    }
+
+    e.y += e.vy;
+    for(const p of platformsNow()){
+      if(aabb(e.x, e.y, e.w, e.h, p.x, p.y, p.w, p.h)){
+        if(e.vy > 0){
+          e.y = p.y - e.h;
+          e.vy = 0;
+          e.onGround = true;
+        }else if(e.vy < 0){
+          e.y = p.y + p.h;
+          e.vy = 0;
+        }
+      }
+    }
+
+    // bounds
+    e.x = clamp(e.x, 0, W.w - e.w);
+    if(e.y > W.h + 300) restart();
+  }
+
+  // ----- Nearest plaque (exterior)
+  function nearestPlaque(e, dist){
+    if(scene !== SCENE.OUT) return null;
+    let best = null, bestD = Infinity;
+    for(const p of exterior.plaques){
+      const px = p.x + p.w/2;
+      const ex = e.x + e.w/2;
+      const d = Math.abs(px - ex);
+      const dy = Math.abs((p.y - 40) - e.y);
+      if(d < dist && dy < 84){
+        if(d < bestD){ bestD = d; best = p; }
+      }
+    }
+    return best;
+  }
+
+  // ----- Interactions (exterior)
+  function readPlaque(pl){
+    const entry = PLAQUES[pl.id];
+    activePlaque = pl;
+    openDialog(entry.who, entry.text, '↑ para fechar • (fica aqui, sem pressa)');
+    if(!pl.read){
+      pl.read = true;
+      readCount++;
+      helder.hearts += 1;
+      helder.sparkle = 1;
+      carol.blush = 1;
+      beep(880,0.05,'triangle',0.02);
+      beep(1180,0.06,'sine',0.018);
+    }
+    if(readCount >= PLAQUES.length) doorUnlocked = true;
+  }
+
+  // ----- Scene transition
+  function fadeToScene(next){
+    if(scene === next) return;
+    cam.fadeTo = 1;
+    cam.nextScene = next;
+  }
+
+  function switchScene(next){
+    scene = next;
+    closeDialog();
+
+    // reposition
+    if(scene === SCENE.IN){
+      carol.x = 440; carol.y = 500; carol.vx=0; carol.vy=0;
+      helder.x = 380; helder.y = 500; helder.vx=0; helder.vy=0;
+      subText.textContent = 'Lá dentro… é o nosso espaço. Cuddle com a Carol e “protege” a casa com carinho.';
+    }else{
+      carol.x = 180; carol.y = 460; carol.vx=0; carol.vy=0;
+      helder.x = 130; helder.y = 460; helder.vx=0; helder.vy=0;
+      subText.textContent = 'Segue a Carol, lê as placas… e quando chegares à porta, entra. Lá dentro, protegemos tudo juntos.';
+    }
+
+    cam.x = 0; cam.y = 0;
+  }
+
+  // ----- Better jump feel (slower + variable + coyote + buffer)
+  function updatePlayer(dt){
+    if(letterOpen) return;
+
+    const left  = keys.has('arrowleft') || keys.has('a');
+    const right = keys.has('arrowright')|| keys.has('d');
+
+    const jumpPressed = pressed.has(' ') || pressed.has('arrowup') || pressed.has('w');
+    const jumpHeld    = keys.has(' ') || keys.has('arrowup') || keys.has('w');
+
+    const interact = pressed.has('arrowdown') || pressed.has('s') || pressed.has('enter');
+    const cuddle   = pressed.has('c');
+
+    // Close dialog with up
+    if((pressed.has('arrowup') || pressed.has('w')) && showDialog) closeDialog();
+
+    // Interact
+    if(interact){
+      if(scene === SCENE.OUT){
+        const p = nearestPlaque(helder, 50);
+        if(p){
+          if(showDialog && activePlaque && activePlaque.id === p.id) closeDialog();
+          else readPlaque(p);
+        }else if(doorUnlocked){
+          // door
+          const H = exterior.house;
+          const doorZone = { x:H.x+104, y:H.y-120, w:H.w-208, h:170 };
+          if(aabb(helder.x,helder.y,helder.w,helder.h, doorZone.x, doorZone.y, doorZone.w, doorZone.h)){
+            openDialog('Carol', 'Entra comigo. 🏡\nAqui dentro, a regra é simples:\ncarinho primeiro, orgulho depois.', '↓ para entrar • ↑ para fechar');
+            // second press enters
+            if(activePlaque === 'DOOR_CONFIRM'){
+              fadeToScene(SCENE.IN);
+            }else{
+              activePlaque = 'DOOR_CONFIRM';
+            }
+          }
+        }
+      }else{
+        // interior interactions (spots)
+        const s = interior.spots;
+        if(aabb(helder.x,helder.y,helder.w,helder.h, s.fire.x, s.fire.y-140, s.fire.w, 160)){
+          openDialog('Carol', 'O fogo está quentinho.\nFica aqui um segundo… respira.', 'C para cuddle • ↑ para fechar');
+          beep(587,0.06,'sine',0.012);
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.sofa.x, s.sofa.y-120, s.sofa.w, 160)){
+          openDialog('Carol', 'O sofá é o nosso “porto seguro”.\nSe quiseres… fica comigo aqui.', 'C para cuddle • ↑ para fechar');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.bed.x, s.bed.y-120, s.bed.w, 160)){
+          openDialog('Carol', 'Aqui não é para fugir.\nÉ para descansar.\nE acordar com cuidado.', 'C para cuddle • ↑ para fechar');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.shelf.x, s.shelf.y-160, s.shelf.w, 190)){
+          openDialog('Carol', 'Estás a ver estes detalhes?\nSão as coisas pequenas que fazem uma casa.\nE eu quero que tu te sintas segura nelas.', 'C para cuddle • ↑ para fechar');
+        }else{
+          // exit door (left side)
+          if(helder.x < 120){
+            openDialog('Helder', 'Queres voltar lá fora?\nPodemos… mas eu gosto mais de te ter aqui, comigo.', '↓ para sair • ↑ para fechar');
+            if(activePlaque === 'EXIT_CONFIRM'){
+              fadeToScene(SCENE.OUT);
+            }else{
+              activePlaque = 'EXIT_CONFIRM';
+            }
+          }
+        }
+      }
+    }
+
+    // Cuddle (both scenes): if close to Carol
+    if(cuddle){
+      const dx = Math.abs((helder.x+helder.w/2)-(carol.x+carol.w/2));
+      const dy = Math.abs((helder.y)-(carol.y));
+      if(dx < 44 && dy < 40){
+        cuddleCount++;
+        helder.hearts += 1;
+        helder.sparkle = 1;
+        carol.blush = 1;
+        if(scene === SCENE.IN){
+          interior.protect = clamp(interior.protect + 0.09, 0, 1);
+          openDialog('Carol', 'Assim.\nSem pressa.\nÉ aqui que eu sinto que estás comigo.', '↑ para fechar');
+        }else{
+          openDialog('Carol', 'Obrigada por ficares.\nEu gosto quando tu voltas ao “calmo”.', '↑ para fechar');
+        }
+        beep(784,0.06,'triangle',0.018);
+        beep(988,0.06,'sine',0.015);
+      }else{
+        openDialog('Helder', 'Chega-te mais à Carol para fazer cuddle 🤍', '↑ para fechar');
+        beep(330,0.06,'sine',0.012);
+      }
+    }
+
+    // Movement
+    const W = worldNow();
+
+    // coyote & buffer timers (ms)
+    if(helder.onGround) helder.coyote = 110;
+    else helder.coyote = Math.max(0, helder.coyote - dt);
+
+    if(jumpPressed) helder.jumpBuf = 120;
+    else helder.jumpBuf = Math.max(0, helder.jumpBuf - dt);
+
+    const accel = helder.onGround ? 0.46 : 0.24;
+    if(left)  { helder.vx -= accel; helder.dir = -1; }
+    if(right) { helder.vx += accel; helder.dir =  1; }
+
+    // Jump execute (buffer + coyote) — slower than before
+    if(helder.jumpBuf > 0 && helder.coyote > 0){
+      helder.jumpBuf = 0;
+      helder.coyote = 0;
+      helder.vy = -8.1;           // slower / less snappy than your old -9.2
+      helder.canCut = true;
+      helder.jumpHold = 155;      // ms of extra lift if held
+      beep(740,0.05,'triangle',0.018);
+    }
+
+    // Variable jump height (hold = a bit more float)
+    if(helder.jumpHold > 0 && jumpHeld){
+      helder.jumpHold -= dt;
+      // add gentle upward bias (makes jump feel “soft”)
+      helder.vy -= 0.06;
+    }else{
+      helder.jumpHold = 0;
+    }
+
+    // Jump cut (release early => shorter jump)
+    if(!jumpHeld && helder.canCut && helder.vy < -2.0){
+      helder.vy *= 0.72;
+      helder.canCut = false;
+    }
+
+    // damping
+    helder.vx *= helder.onGround ? W.friction : W.air;
+    helder.vx = clamp(helder.vx, -3.7, 3.7);
+
+    // gravity
+    helder.vy += W.gravity;
+    helder.vy = clamp(helder.vy, -18, 14);
+
+    resolveEntity(helder);
+
+    // spark decay
+    helder.sparkle = Math.max(0, helder.sparkle - dt*0.0023);
+    carol.blush = Math.max(0, carol.blush - dt*0.0020);
+  }
+
+  // ----- Carol AI (exterior leads; interior stays close / “home vibe”)
+  function updateCarol(dt){
+    if(letterOpen) return;
+    const W = worldNow();
+
+    if(scene === SCENE.OUT){
+      const nearPlaque = nearestPlaque(carol, 44);
+      const nearHelder = Math.abs((carol.x+carol.w/2) - (helder.x+helder.w/2)) < 140;
+
+      // wait at unread plaques
+      if(nearPlaque && !nearPlaque.read && (nearPlaque.x - carol.x) < 30){
+        lead.pause = Math.max(lead.pause, 520);
+        lead.state = 'wait';
+      }
+
+      // if Helder reading, wait
+      if(showDialog) lead.pause = Math.max(lead.pause, 200);
+
+      const gap = (carol.x - helder.x);
+      const desired = gap > 280 ? 0.70 : (gap < 120 ? 1.00 : lead.targetSpeed);
+
+      if(lead.pause > 0){
+        lead.pause -= dt;
+        carol.vx *= 0.84;
+        lead.state = 'wait';
+      }else{
+        lead.state = 'walk';
+        carol.vx = lerp(carol.vx, desired, 0.08);
+      }
+
+      // cute hop
+      if(carol.onGround && Math.random()<0.0026 && nearHelder){
+        carol.vy = -7.0;
+        beep(990,0.04,'sine',0.010);
+      }
+
+      carol.vy += W.gravity;
+      carol.vy = clamp(carol.vy, -18, 14);
+
+      resolveEntity(carol);
+
+      // keep a bit ahead
+      if(carol.x < helder.x + 70) carol.x = helder.x + 70;
+      carol.dir = 1;
+
+      // door prompt
+      if(doorUnlocked){
+        const H = exterior.house;
+        const doorZone = { x:H.x+104, y:H.y-120, w:H.w-208, h:170 };
+        if(aabb(helder.x,helder.y,helder.w,helder.h, doorZone.x, doorZone.y, doorZone.w, doorZone.h) && !showDialog){
+          openDialog('Carol', 'Estamos à porta. 🏡\nCarrega ↓ para falar comigo… e depois ↓ outra vez para entrar.', '↓ para entrar • ↑ para fechar');
+        }
+      }
+    } else {
+      // interior: Carol stays close; if Helder stops, she cuddles proximity
+      const dx = (helder.x - carol.x);
+      const target = helder.x + 34;
+      carol.vx = lerp(carol.vx, clamp((target - carol.x) * 0.03, -1.4, 1.4), 0.10);
+
+      // tiny idle hops, super gentle
+      if(carol.onGround && Math.random()<0.0018){
+        carol.vy = -6.2;
+        beep(660,0.04,'triangle',0.008);
+      }
+
+      carol.vy += W.gravity;
+      carol.vy = clamp(carol.vy, -18, 14);
+      resolveEntity(carol);
+
+      carol.dir = dx >= 0 ? 1 : -1;
+
+      // if protected enough -> letter
+      if(interior.protect >= 0.98 && !letterOpen){
+        openDialog('Carol', 'Eu sinto.\nIsto… é segurança.\nAbre a carta quando quiseres.', '↓ para abrir carta • ↑ para fechar');
+        // if interact after this, open letter
+      }
+    }
+  }
+
+  // ----- Restart
+  function restart(){
+    closeDialog();
+    closeLetter();
+
+    scene = SCENE.OUT;
+    cam.x=0; cam.y=0; cam.fade=0; cam.fadeTo=0;
+
+    carol.x=180; carol.y=460; carol.vx=0; carol.vy=0; carol.dir=1; carol.onGround=false; carol.blush=0;
+    helder.x=130; helder.y=460; helder.vx=0; helder.vy=0; helder.dir=1; helder.onGround=false; helder.sparkle=0; helder.hearts=0;
+
+    for(const p of exterior.plaques){ p.read=false; p.glow=0; }
+    readCount = 0; cuddleCount = 0; doorUnlocked = false;
+    interior.protect = 0;
+
+    lead.pause = 0; lead.state='walk';
+
+    subText.textContent = 'Segue a Carol, lê as placas… e quando chegares à porta, entra. Lá dentro, protegemos tudo juntos.';
+    beep(392,0.06,'sine',0.02);
+  }
+
+  // ----- Rendering primitives
+  function pxRect(x,y,w,h, c, a=1){
+    ctx.globalAlpha=a; ctx.fillStyle=c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    ctx.globalAlpha=1;
+  }
+  function pxStrokeRect(x,y,w,h, c, a=1){
+    ctx.globalAlpha=a; ctx.strokeStyle=c;
+    ctx.lineWidth=1;
+    ctx.strokeRect(Math.round(x)+0.5, Math.round(y)+0.5, Math.round(w)-1, Math.round(h)-1);
+    ctx.globalAlpha=1;
+  }
+  function pxCircle(x,y,r, c, a=1){
+    ctx.globalAlpha=a; ctx.fillStyle=c;
+    ctx.beginPath(); ctx.arc(Math.round(x), Math.round(y), r, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  // ----- Backgrounds
+  function drawSky(t){
+    const g = ctx.createLinearGradient(0,0,0,VH);
+    g.addColorStop(0, '#090b18');
+    g.addColorStop(0.45, '#101a3a');
+    g.addColorStop(1, '#070a12');
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,VW,VH);
+
+    // stars
+    for(let i=0;i<92;i++){
+      const sx = (i*97.3 + (t*0.02)) % VW;
+      const sy = (i*53.7) % (VH*0.62);
+      const tw = (Math.sin(t*0.004 + i)*0.5+0.5);
+      pxRect(sx, sy, 1, 1, 'rgba(255,255,255,.9)', 0.20 + 0.65*tw);
+    }
+
+    // moon
+    const mx = VW*0.78, my = VH*0.18;
+    pxCircle(mx, my, 26, 'rgba(255,229,138,.22)', 1);
+    pxCircle(mx-6, my-6, 20, 'rgba(255,255,255,.10)', 1);
+    pxCircle(mx-2, my-2, 16, 'rgba(255,229,138,.18)', 1);
+
+    // aurora
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = 'rgba(156,255,215,.05)';
+    ctx.beginPath();
+    ctx.moveTo(0, VH*0.22);
+    for(let x=0;x<=VW;x+=20){
+      const y = VH*0.22 + Math.sin((x*0.015)+(t*0.0012))*18 + Math.sin((x*0.006)-(t*0.0009))*10;
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(VW,0); ctx.lineTo(0,0); ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    drawHills(t, 0.18, '#0e1230', 0.38);
+    drawHills(t, 0.35, '#10183a', 0.52);
+    drawHills(t, 0.60, '#131a3e', 0.68);
+  }
+
+  function drawHills(t, layer, color, yBase){
+    const speed = (0.12 + layer*0.22);
+    const off = (cam.x*layer*0.55 + t*speed*0.02);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, VH*yBase);
+    for(let x=0;x<=VW;x+=22){
+      const y = VH*yBase + Math.sin((x*0.012)+off)*18 + Math.sin((x*0.004)-off*1.2)*10;
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(VW, VH); ctx.lineTo(0, VH); ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawInteriorBackground(t){
+    // walls
+    const g = ctx.createLinearGradient(0,0,0,VH);
+    g.addColorStop(0, '#0c1020');
+    g.addColorStop(1, '#080a12');
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,VW,VH);
+
+    // subtle wallpaper pattern
+    for(let y=42;y<VH-120;y+=22){
+      for(let x=0;x<VW;x+=26){
+        const tw = (Math.sin(t*0.001 + (x+y)*0.02)*0.5+0.5);
+        pxRect(x+8, y, 1, 1, 'rgba(255,255,255,.14)', 0.06+0.08*tw);
+      }
+    }
+
+    // warm lamp glow near sofa
+    pxRect(520 - cam.x, 210 - cam.y, 220, 160, 'rgba(255,229,138,.06)', 0.75);
+
+    // vignette top corners (room feel)
+    pxRect(0,0,VW,16,'rgba(0,0,0,.35)',1);
+  }
+
+  // ----- Particles
+  function particlesNow(){
+    return scene === SCENE.OUT ? exterior.particles : interior.particles;
+  }
+  function drawParticles(t){
+    const W = worldNow();
+    for(const p of particlesNow()){
+      p.t += 1;
+      p.x += p.vx;
+      p.y += p.vy + Math.sin((p.t*0.02)+p.seed)*0.06;
+
+      if(p.x < -20) p.x = W.w + 20;
+      if(p.x > W.w + 20) p.x = -20;
+      if(p.y < 20) p.y = 320;
+      if(p.y > 360) p.y = 30;
+
+      const sx = (p.x - cam.x);
+      const sy = (p.y - cam.y);
+
+      if(sx < -30 || sx > VW+30) continue;
+
+      if(p.kind === 'firefly'){
+        const tw = (Math.sin(p.t*0.04 + p.seed)*0.5+0.5);
+        pxRect(sx, sy, 1, 1, 'rgba(255,229,138,.95)', 0.14 + 0.56*tw);
+        if(tw>0.86) pxRect(sx+1, sy, 1, 1, 'rgba(255,179,217,.9)', 0.18);
+      }else if(p.kind === 'petal'){
+        pxRect(sx, sy, 2, 1, 'rgba(255,179,217,.75)', 0.25);
+      }else{
+        pxRect(sx, sy, 1, 1, 'rgba(156,255,215,.8)', 0.22);
+      }
+    }
+  }
+
+  // ----- World drawing
+  function drawPlatform(p, t){
+    const x = p.x - cam.x;
+    const y = p.y - cam.y;
+    if(x+p.w < -60 || x > VW+60) return;
+
+    if(scene === SCENE.IN && p.y === 540){
+      // interior floor
+      pxRect(x, y, p.w, 8, 'rgba(255,255,255,.06)', 1);
+      pxRect(x, y+8, p.w, p.h-8, 'rgba(0,0,0,.20)', 1);
+      for(let i=0;i<p.w;i+=18){
+        const tw = (Math.sin(t*0.002 + (p.x+i)*0.03)*0.5+0.5);
+        pxRect(x+i, y+14, 10, 1, 'rgba(255,179,217,.08)', 0.2+0.15*tw);
+      }
+      return;
+    }
+
+    // exterior grass
+    pxRect(x, y, p.w, 6, '#203a3a', 1);
+    for(let i=0;i<p.w;i+=6){
+      const wig = Math.sin((i*0.07)+(t*0.004))*1.5;
+      pxRect(x+i, y-3+wig, 2, 3, 'rgba(156,255,215,.10)', 1);
+      if(Math.random()<0.02) pxRect(x+i+2, y-2+wig, 1, 2, 'rgba(255,179,217,.10)', 1);
+    }
+
+    pxRect(x, y+6, p.w, p.h-6, '#15192b', 1);
+    pxRect(x, y+6, p.w, 3, 'rgba(255,255,255,.04)', 1);
+    pxRect(x, y+p.h-8, p.w, 8, 'rgba(0,0,0,.22)', 1);
+
+    for(let i=0;i<Math.min(16, p.w/40);i++){
+      const sx = x + (i*37 + (p.x*0.3)%37);
+      const sy = y + 18 + (i%3)*14;
+      pxRect(sx, sy, 2, 2, 'rgba(255,255,255,.05)', 1);
+    }
+  }
+
+  function drawExteriorDecor(t){
+    for(const d of exterior.decor){
+      const x = d.x - cam.x;
+      if(x < -80 || x > VW+80) continue;
+
+      const baseY = 520 - cam.y;
+      const s = d.s;
+
+      if(d.kind === 'tree'){
+        pxRect(x-2*s, baseY-52*s, 6*s, 54*s, 'rgba(255,229,138,.08)', 1);
+        pxRect(x-1*s, baseY-52*s, 4*s, 54*s, 'rgba(0,0,0,.18)', 1);
+        const sway = Math.sin((t*0.002)+d.seed)*2.4*s;
+        for(let i=0;i<26;i++){
+          const cx = x + sway + Math.sin(i*1.3+d.seed)*6*s*0.12;
+          const cy = baseY - 70*s + (i%6)*6*s;
+          pxRect(cx, cy, 10*s, 6*s, 'rgba(156,255,215,.08)', 1);
+          if(Math.random()<0.03) pxRect(cx+2*s, cy+1*s, 2*s, 2*s, 'rgba(255,179,217,.10)', 1);
+        }
+      }else if(d.kind === 'bush'){
+        for(let i=0;i<12;i++){
+          const bx = x + Math.sin(i*1.2+d.seed)*12*s*0.12;
+          const by = baseY - 18*s + (i%3)*5*s;
+          pxRect(bx, by, 12*s, 8*s, 'rgba(255,179,217,.07)', 1);
+          pxRect(bx+2*s, by+2*s, 8*s, 4*s, 'rgba(156,255,215,.05)', 1);
+        }
+      }else{
+        const bx=x, by=baseY - 6*s;
+        pxRect(bx, by, 1*s, 6*s, 'rgba(156,255,215,.12)', 1);
+        const blink = (Math.sin(t*0.01 + d.seed)*0.5+0.5);
+        pxRect(bx-2*s, by-2*s, 2*s, 2*s, 'rgba(255,179,217,.12)', 0.3+0.4*blink);
+        pxRect(bx+1*s, by-2*s, 2*s, 2*s, 'rgba(255,229,138,.10)', 0.25+0.4*blink);
+      }
+    }
+  }
+
+  function drawPlaque(pl, t){
+    const x = pl.x - cam.x;
+    const y = pl.y - cam.y;
+    if(x < -50 || x > VW+50) return;
+
+    const near = nearestPlaque(helder, 50);
+    const focus = near && near.id === pl.id;
+    pl.glow = lerp(pl.glow, focus ? 1 : 0, 0.08);
+
+    pxRect(x+11, y-34, 4, 34, 'rgba(255,255,255,.08)', 1);
+    pxRect(x+11, y-10, 4, 10, 'rgba(0,0,0,.18)', 1);
+
+    const boardA = pl.read ? 'rgba(156,255,215,.10)' : 'rgba(255,179,217,.10)';
+    pxRect(x+2, y-46, 22, 14, boardA, 1);
+    pxStrokeRect(x+2, y-46, 22, 14, 'rgba(255,255,255,.10)', 1);
+
+    pxRect(x+6, y-42, 14, 2, 'rgba(255,255,255,.12)', 1);
+    pxRect(x+6, y-39, 10, 2, 'rgba(255,255,255,.08)', 1);
+
+    if(!pl.read){
+      const tw = (Math.sin(t*0.01 + pl.id)*0.5+0.5);
+      pxRect(x+12, y-52, 1, 1, 'rgba(255,229,138,.95)', 0.25 + 0.55*tw + 0.2*pl.glow);
+      pxRect(x+13, y-52, 1, 1, 'rgba(255,179,217,.85)', 0.18 + 0.35*tw*pl.glow);
+    }
+
+    if(pl.glow>0.02){
+      pxRect(x-2, y-50, 30, 22, 'rgba(255,229,138,.04)', 0.35*pl.glow);
+      pxRect(x-4, y-52, 34, 26, 'rgba(156,255,215,.03)', 0.35*pl.glow);
+    }
+  }
+
+  function drawHouse(t){
+    const H = exterior.house;
+    const x = H.x - cam.x;
+    const y = H.y - cam.y;
+    if(x+H.w < -80 || x > VW+80) return;
+
+    const glow = 0.25 + 0.25*(Math.sin(t*0.006)*0.5+0.5);
+    pxRect(x+70, y-110, 120, 84, 'rgba(255,229,138,.06)', glow);
+
+    // roof
+    pxRect(x+16, y-146, 228, 24, 'rgba(255,179,217,.10)', 1);
+    for(let i=0;i<228;i+=8) pxRect(x+16+i, y-146, 6, 1, 'rgba(255,255,255,.06)', 1);
+
+    // body
+    pxRect(x+30, y-122, 200, 122, 'rgba(255,255,255,.06)', 1);
+    pxStrokeRect(x+30, y-122, 200, 122, 'rgba(255,255,255,.10)', 1);
+
+    // door
+    const doorLit = doorUnlocked ? 'rgba(156,255,215,.10)' : 'rgba(255,179,217,.08)';
+    pxRect(x+118, y-68, 40, 68, doorLit, 1);
+    pxRect(x+150, y-36, 2, 2, 'rgba(255,229,138,.25)', 1);
+
+    // windows
+    pxRect(x+64, y-94, 28, 24, 'rgba(255,229,138,.10)', 1);
+    pxRect(x+168,y-94, 28, 24, 'rgba(255,229,138,.10)', 1);
+
+    // sign
+    const signC = doorUnlocked ? 'rgba(156,255,215,.14)' : 'rgba(255,179,217,.10)';
+    pxRect(x+96, y-136, 76, 10, signC, 1);
+    pxRect(x+102, y-134, 2, 6, 'rgba(255,255,255,.10)', 1);
+    pxRect(x+110, y-134, 2, 6, 'rgba(255,255,255,.10)', 1);
+    pxRect(x+118, y-134, 2, 6, 'rgba(255,255,255,.10)', 1);
+
+    if(doorUnlocked){
+      const tw = (Math.sin(t*0.012)*0.5+0.5);
+      pxRect(x+132, y-162, 1, 1, 'rgba(255,229,138,.95)', 0.25 + 0.55*tw);
+      pxRect(x+133, y-162, 1, 1, 'rgba(255,179,217,.85)', 0.20 + 0.45*tw);
+    }
+  }
+
+  function drawInterior(t){
+    // floor already via platform
+    const s = interior.spots;
+    const ox = -cam.x, oy = -cam.y;
+
+    // fireplace
+    pxRect(s.fire.x+ox, s.fire.y-110+oy, 100, 110, 'rgba(255,255,255,.06)', 1);
+    pxStrokeRect(s.fire.x+ox, s.fire.y-110+oy, 100, 110, 'rgba(255,255,255,.10)', 1);
+    const flame = 0.35 + 0.35*(Math.sin(t*0.015)*0.5+0.5);
+    pxRect(s.fire.x+ox+34, s.fire.y-84+oy, 32, 40, 'rgba(255,229,138,.10)', 0.6);
+    pxRect(s.fire.x+ox+40, s.fire.y-78+oy, 20, 28, 'rgba(255,179,217,.10)', 0.5);
+    pxRect(s.fire.x+ox+46, s.fire.y-72+oy, 8, 16, 'rgba(255,229,138,.12)', flame);
+
+    // shelf
+    pxRect(s.shelf.x+ox, s.shelf.y-90+oy, 140, 90, 'rgba(255,255,255,.06)', 1);
+    pxStrokeRect(s.shelf.x+ox, s.shelf.y-90+oy, 140, 90, 'rgba(255,255,255,.10)', 1);
+    for(let i=0;i<5;i++){
+      pxRect(s.shelf.x+ox+14+i*24, s.shelf.y-74+oy, 14, 6, 'rgba(156,255,215,.08)', 1);
+      pxRect(s.shelf.x+ox+14+i*24, s.shelf.y-54+oy, 18, 6, 'rgba(255,179,217,.08)', 1);
+    }
+
+    // sofa
+    pxRect(s.sofa.x+ox, s.sofa.y-56+oy, 180, 56, 'rgba(255,179,217,.08)', 1);
+    pxStrokeRect(s.sofa.x+ox, s.sofa.y-56+oy, 180, 56, 'rgba(255,255,255,.10)', 1);
+    pxRect(s.sofa.x+ox+12, s.sofa.y-46+oy, 156, 18, 'rgba(255,255,255,.06)', 1);
+
+    // bed
+    pxRect(s.bed.x+ox, s.bed.y-50+oy, 220, 50, 'rgba(156,255,215,.07)', 1);
+    pxStrokeRect(s.bed.x+ox, s.bed.y-50+oy, 220, 50, 'rgba(255,255,255,.10)', 1);
+    pxRect(s.bed.x+ox+16, s.bed.y-42+oy, 80, 18, 'rgba(255,229,138,.06)', 1);
+
+    // “protective aura” bar on canvas
+    const p = interior.protect;
+    if(p > 0.02){
+      const ax = 26, ay = 58;
+      pxRect(ax, ay, 120, 10, 'rgba(14,16,28,.50)', 1);
+      pxStrokeRect(ax, ay, 120, 10, 'rgba(255,255,255,.10)', 1);
+      pxRect(ax+1, ay+1, 118*p, 8, 'rgba(156,255,215,.12)', 1);
+      if(p>0.66) pxRect(ax+1, ay+1, 118*p, 8, 'rgba(255,179,217,.08)', 0.8);
+    }
+  }
+
+  // ----- Draw cats (pixel)
+  function drawCat(cat, t){
+    const x = cat.x - cam.x;
+    const y = cat.y - cam.y;
+    if(x < -60 || x > VW+60) return;
+
+    cat.step += Math.abs(cat.vx)*0.08 + (cat.onGround ? 0.01 : 0.004);
+    const bob = cat.onGround ? Math.sin(cat.step)*1.15 : 0;
+    const dir = cat.dir;
+
+    pxRect(x+6, y+cat.h+3, 14, 2, 'rgba(0,0,0,.25)', 1);
+
+    pxRect(x+6, y+6+bob, 14, 10, cat.colorA, 1);
+    pxRect(x+8, y+8+bob, 10, 6, cat.colorB, 0.35);
+
+    pxRect(x+4, y+2+bob, 18, 10, cat.colorA, 1);
+
+    pxRect(x+5, y+0+bob, 4, 4, cat.colorA, 1);
+    pxRect(x+17, y+0+bob, 4, 4, cat.colorA, 1);
+    pxRect(x+6, y+1+bob, 2, 2, 'rgba(255,255,255,.12)', 1);
+    pxRect(x+18, y+1+bob, 2, 2, 'rgba(255,255,255,.12)', 1);
+
+    const eyeY = y+6+bob;
+    const eyeX1 = x + (dir>0 ? 9 : 11);
+    const eyeX2 = x + (dir>0 ? 14 : 16);
+    pxRect(eyeX1, eyeY, 2, 2, 'rgba(0,0,0,.45)', 1);
+    pxRect(eyeX2, eyeY, 2, 2, 'rgba(0,0,0,.45)', 1);
+
+    if(showDialog && cat.name==='Helder'){
+      pxRect(eyeX1+1, eyeY, 1, 1, 'rgba(255,229,138,.55)', 1);
+      pxRect(eyeX2+1, eyeY, 1, 1, 'rgba(255,229,138,.55)', 1);
+    }
+
+    pxRect(x + (dir>0 ? 12 : 14), y+9+bob, 1, 1, 'rgba(255,229,138,.35)', 1);
+
+    const tailX = x + (dir>0 ? 2 : 20);
+    pxRect(tailX, y+8+bob, 4, 2, cat.colorA, 1);
+    pxRect(tailX + (dir>0? -1:1), y+6+bob, 3, 2, cat.colorA, 1);
+
+    if(cat.blush>0.02){
+      const a = 0.12 + 0.22*cat.blush;
+      pxRect(x+7, y+8+bob, 2, 1, 'rgba(255,179,217,.75)', a);
+      pxRect(x+17,y+8+bob, 2, 1, 'rgba(255,179,217,.75)', a);
+    }
+
+    if(cat.name==='Helder'){
+      const tw = (Math.sin(t*0.02)*0.5+0.5);
+      const sA = 0.10 + 0.40*cat.sparkle*tw;
+      pxRect(x+12, y-4+bob, 1, 1, 'rgba(156,255,215,.9)', sA);
+      pxRect(x+13, y-5+bob, 1, 1, 'rgba(255,229,138,.9)', sA*0.8);
+
+      const hc = Math.min(7, cat.hearts);
+      for(let i=0;i<hc;i++){
+        const fx = x + 8 + (i*6%18) - 6;
+        const fy = y - 10 - (i*4) - (Math.sin(t*0.01 + i)*2);
+        pxRect(fx, fy, 2, 1, 'rgba(255,179,217,.25)', 1);
+        pxRect(fx+1, fy-1, 1, 2, 'rgba(255,179,217,.25)', 1);
+      }
+    }
+  }
+
+  function drawVignette(){
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.fillRect(0,0,VW,14);
+    ctx.fillRect(0,VH-14,VW,14);
+    ctx.fillRect(0,0,14,VH);
+    ctx.fillRect(VW-14,0,14,VH);
+    ctx.globalAlpha = 1;
+  }
+
+  // ----- UI update
+  function updateUI(){
+    const W = worldNow();
+    const pct = clamp((helder.x / Math.max(1,(W.w - 240))) * 100, 0, 100);
+    barFill.style.width = pct.toFixed(1) + '%';
+
+    const extra = scene === SCENE.IN ? ` • Proteção: ${(interior.protect*100)|0}%` : '';
+    miniText.textContent = `Placas: ${readCount} / ${PLAQUES.length} • Corações: ${helder.hearts} • Cena: ${sceneLabel()}${extra}`;
+  }
+
+  // ----- Loop
+  let last = performance.now();
+  let t = 0;
+
+  function loop(now){
+    const dt = clamp(now - last, 8, 40);
+    last = now;
+    t += dt;
+
+    // music tick
+    if(audioOn){
+      musicTimer += dt;
+      const step = (scene === SCENE.IN ? 360 : 420);
+      if(musicTimer >= step){
+        musicTimer = 0;
+        const n = musicPattern[musicIndex++ % musicPattern.length];
+        beep(n.f, n.d, n.t, n.g);
+      }
+    }
+
+    // Restart
+    if(pressed.has('r')) restart();
+
+    // special: open letter in interior after protect high + interact
+    if(scene === SCENE.IN && !letterOpen && interior.protect >= 0.98){
+      const interact = pressed.has('arrowdown') || pressed.has('s') || pressed.has('enter');
+      if(interact) openLetter();
+    }
+
+    // Update
+    updatePlayer(dt);
+    updateCarol(dt);
+
+    // Camera follows Helder
+    const W = worldNow();
+    const targetX = clamp(helder.x - VW*0.42, 0, W.w - VW);
+    cam.x = lerp(cam.x, targetX, 0.08);
+
+    const targetY = clamp((helder.y - VH*0.62), -40, 140);
+    cam.y = lerp(cam.y, targetY, 0.05);
+
+    // Fade logic
+    cam.fade = lerp(cam.fade, cam.fadeTo, 0.08);
+    if(cam.fadeTo > 0.98 && cam.fade > 0.96 && cam.nextScene){
+      const next = cam.nextScene;
+      cam.nextScene = null;
+      switchScene(next);
+      cam.fadeTo = 0;
+    }
+
+    // Render
+    if(scene === SCENE.OUT) drawSky(t);
+    else drawInteriorBackground(t);
+
+    drawParticles(t);
+
+    // platforms
+    for(const p of platformsNow()) drawPlatform(p, t);
+
+    if(scene === SCENE.OUT){
+      drawExteriorDecor(t);
+      for(const pl of exterior.plaques) drawPlaque(pl, t);
+      drawHouse(t);
+
+      // little hint near plaques
+      const near = nearestPlaque(helder, 50);
+      if(near && !showDialog && !letterOpen){
+        const hx = near.x - cam.x + 8;
+        const hy = near.y - cam.y - 66;
+        const pulse = (Math.sin(t*0.01)*0.5+0.5);
+        pxRect(hx-18, hy-10, 76, 16, 'rgba(14,16,28,.45)', 1);
+        pxStrokeRect(hx-18, hy-10, 76, 16, 'rgba(255,255,255,.10)', 1);
+        pxRect(hx-12, hy-5, 1, 1, 'rgba(255,229,138,.95)', 0.25+0.5*pulse);
+        // tiny "↓ ler"
+        pxRect(hx-6, hy-6, 4, 2, 'rgba(238,243,255,.55)', 1);
+        pxRect(hx-5, hy-4, 2, 6, 'rgba(238,243,255,.55)', 1);
+        pxRect(hx+6, hy-4, 14, 2, 'rgba(238,243,255,.45)', 1);
+        pxRect(hx+6, hy-1, 12, 2, 'rgba(238,243,255,.32)', 1);
+      }
+    }else{
+      drawInterior(t);
+
+      // prompt cuddle
+      if(!showDialog && !letterOpen){
+        const dx = Math.abs((helder.x+helder.w/2)-(carol.x+carol.w/2));
+        if(dx < 62){
+          pxRect(22, VH-64, 190, 34, 'rgba(14,16,28,.45)', 1);
+          pxStrokeRect(22, VH-64, 190, 34, 'rgba(255,255,255,.10)', 1);
+          pxRect(34, VH-52, 1, 1, 'rgba(255,229,138,.95)', 0.55);
+          // minimal “C cuddle”
+          pxRect(48, VH-54, 10, 2, 'rgba(238,243,255,.40)', 1);
+          pxRect(48, VH-50, 12, 2, 'rgba(238,243,255,.30)', 1);
+        }
+      }
+    }
+
+    drawCat(carol, t);
+    drawCat(helder, t);
+
+    drawVignette();
+
+    // Fade overlay
+    if(cam.fade > 0.02){
+      pxRect(0,0,VW,VH,'rgba(0,0,0,.75)', cam.fade);
+    }
+
+    updateUI();
+    pressed.clear();
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // Prevent scroll
+  window.addEventListener('touchmove', (e)=>e.preventDefault(), {passive:false});
+
+})();
+</script>
+</body>
+</html>
