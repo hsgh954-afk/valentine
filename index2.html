@@ -1,0 +1,2095 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Carol + Helder — Floresta Encantada 🐾✨</title>
+  <meta name="theme-color" content="#101a22" />
+  <style>
+    :root{
+      --ink:#eef7ff;
+      --muted:#b8d0df;
+
+      /* Paleta encantada (mais viva) */
+      --night0:#071018;
+      --night1:#0c1c2a;
+      --night2:#123047;
+
+      --glow:#b9ffdf;
+      --mint:#74ffd5;
+      --pink:#ffb3d9;
+      --gold:#ffe58a;
+      --lav:#b9b6ff;
+
+      --leaf0:#1a6b4e;
+      --leaf1:#2fae78;
+      --leaf2:#74ffd5;
+
+      --mush0:#ff74b8;
+      --mush1:#ffe58a;
+
+      --shadow: rgba(0,0,0,.45);
+      --stroke: rgba(255,255,255,.14);
+      --glass: rgba(255,255,255,.06);
+
+      --danger:#ff6b8b;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      overflow:hidden;
+      touch-action:none;
+
+      background:
+        radial-gradient(1200px 800px at 20% 14%, rgba(255,179,217,.15) 0%, transparent 48%),
+        radial-gradient(1200px 900px at 80% 22%, rgba(116,255,213,.14) 0%, transparent 52%),
+        radial-gradient(1400px 1000px at 50% 80%, rgba(255,229,138,.09) 0%, transparent 60%),
+        linear-gradient(180deg, var(--night0), var(--night1) 50%, var(--night0));
+    }
+
+    #wrap{ position:relative; width:100%; height:100%; }
+    canvas{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display:block;
+    }
+
+    /* HUD */
+    .hud{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 14px max(14px, env(safe-area-inset-left));
+      gap:12px;
+      z-index:10;
+    }
+
+    .badge{
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:10px 12px;
+      box-shadow: 0 16px 44px var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      max-width:min(580px, 96vw);
+      position:relative;
+      overflow:hidden;
+    }
+    .badge:before{
+      content:"";
+      position:absolute; inset:-60px;
+      background:
+        radial-gradient(420px 160px at 18% 18%, rgba(255,179,217,.18), transparent 62%),
+        radial-gradient(460px 180px at 78% 78%, rgba(116,255,213,.14), transparent 60%),
+        radial-gradient(320px 140px at 60% 10%, rgba(255,229,138,.12), transparent 60%);
+      filter:saturate(1.12);
+      pointer-events:none;
+    }
+
+    .title{
+      position:relative;
+      display:flex; align-items:center; gap:10px;
+      font-weight:900; letter-spacing:.2px;
+      line-height:1.1; font-size:14px;
+      color:var(--ink);
+      text-shadow: 0 6px 20px rgba(0,0,0,.30);
+    }
+    .title small{ font-weight:750; color:var(--muted); opacity:.95; }
+
+    .sub{
+      position:relative;
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .kbd{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:8px;
+      font-size:11px;
+      color:rgba(238,247,255,.86);
+    }
+    .key{
+      padding:2px 8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress{
+      margin-left:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+      max-width:min(460px, 52vw);
+    }
+    .bar{
+      width:min(420px, 56vw);
+      height:12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      overflow:hidden;
+      box-shadow: 0 16px 44px var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position:relative;
+    }
+    .bar:before{
+      content:"";
+      position:absolute; inset:-60px;
+      background:
+        radial-gradient(400px 130px at 20% 40%, rgba(255,179,217,.12), transparent 65%),
+        radial-gradient(400px 130px at 80% 40%, rgba(116,255,213,.10), transparent 65%);
+      opacity:.85;
+      pointer-events:none;
+    }
+    .bar > i{
+      position:relative;
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--pink), var(--mint), var(--gold), var(--lav));
+      border-radius:999px;
+      filter: saturate(1.18);
+      box-shadow: 0 0 26px rgba(255,179,217,.26), 0 0 26px rgba(116,255,213,.20);
+    }
+    .mini{
+      font-size:11px;
+      color:var(--muted);
+      text-align:right;
+      opacity:.95;
+    }
+
+    .toolbar{
+      pointer-events:auto;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .pill{
+      pointer-events:auto;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color:rgba(238,247,255,.94);
+      padding:8px 10px;
+      border-radius:999px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 14px 40px rgba(0,0,0,.34);
+      transition: transform .12s ease, background .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      display:flex; gap:8px; align-items:center;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .pill:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: rgba(255,229,138,.55);
+      box-shadow: 0 0 16px rgba(255,229,138,.22);
+    }
+
+    /* Dialog */
+    .dialog{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: max(18px, env(safe-area-inset-bottom));
+      width:min(980px, 94vw);
+      pointer-events:none;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:stretch;
+      z-index:20;
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:20px;
+      padding:14px 14px 12px;
+      box-shadow: 0 26px 70px rgba(0,0,0,.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+      position:relative;
+    }
+    .panel:before{
+      content:"";
+      position:absolute; inset:-70px;
+      background:
+        radial-gradient(560px 200px at 18% 18%, rgba(255,179,217,.16), transparent 60%),
+        radial-gradient(560px 200px at 78% 90%, rgba(116,255,213,.12), transparent 60%),
+        radial-gradient(480px 160px at 65% 20%, rgba(255,229,138,.12), transparent 64%);
+      pointer-events:none;
+      filter:saturate(1.14);
+    }
+    .who{ display:flex; align-items:center; gap:10px; position:relative; }
+    .tag{
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.25px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color:rgba(238,247,255,.92);
+    }
+    .tag.carol{ box-shadow: 0 0 0 1px rgba(255,179,217,.14) inset; }
+    .tag.helder{ box-shadow: 0 0 0 1px rgba(116,255,213,.14) inset; }
+    .tag.plaque{ box-shadow: 0 0 0 1px rgba(255,229,138,.12) inset; }
+    .hint{ margin-left:auto; color:rgba(238,247,255,.72); font-size:12px; }
+    .text{
+      margin-top:10px;
+      font-size:14px;
+      line-height:1.55;
+      color:rgba(238,247,255,.94);
+      position:relative;
+      white-space:pre-wrap;
+      text-shadow: 0 8px 24px rgba(0,0,0,.28);
+    }
+
+    /* Letter overlay */
+    .overlay{
+      position:absolute; inset:0;
+      display:none;
+      place-items:center;
+      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+      background:
+        radial-gradient(1200px 900px at 50% 25%, rgba(255,179,217,.14), transparent 56%),
+        radial-gradient(1200px 900px at 62% 62%, rgba(116,255,213,.12), transparent 62%),
+        radial-gradient(1200px 900px at 40% 78%, rgba(255,229,138,.10), transparent 64%),
+        rgba(0,0,0,.64);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index:30;
+    }
+    .sheet{
+      width:min(980px, 96vw);
+      max-height:min(84vh, 980px);
+      overflow:auto;
+      background: linear-gradient(180deg, rgba(18,26,34,.96), rgba(10,14,22,.96));
+      border:1px solid rgba(255,255,255,.20);
+      border-radius:24px;
+      box-shadow: 0 36px 110px rgba(0,0,0,.70);
+      padding:18px 18px 16px;
+      position:relative;
+    }
+    .sheet:before{
+      content:"";
+      position:absolute; inset:-70px;
+      background:
+        radial-gradient(560px 200px at 18% 10%, rgba(255,179,217,.14), transparent 60%),
+        radial-gradient(560px 200px at 82% 90%, rgba(116,255,213,.12), transparent 60%),
+        radial-gradient(560px 200px at 60% 20%, rgba(255,229,138,.10), transparent 64%);
+      pointer-events:none;
+    }
+    .sheet h1{ margin:0 0 10px 0; font-size:18px; letter-spacing:.2px; position:relative; }
+    .sheet p{ margin:0; color:rgba(238,247,255,.94); line-height:1.65; font-size:14px; white-space:pre-wrap; position:relative; }
+    .actions{
+      margin-top:14px;
+      display:flex; gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+      position:relative;
+    }
+    .btn{
+      pointer-events:auto;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color:rgba(238,247,255,.94);
+      padding:9px 12px;
+      border-radius:14px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 14px 44px rgba(0,0,0,.40);
+      transition: transform .12s ease, background .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(255,179,217,.20), rgba(116,255,213,.16), rgba(255,229,138,.14));
+      border-color: rgba(255,255,255,.22);
+    }
+    .btn.danger{
+      background: rgba(255,107,139,.14);
+      border-color: rgba(255,107,139,.38);
+    }
+
+    /* Mobile controls */
+    .touch{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding: 10px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      display:none;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      pointer-events:none;
+      z-index:25;
+    }
+    .pad{ display:flex; gap:10px; align-items:flex-end; pointer-events:none; }
+    .tbtn{
+      pointer-events:auto;
+      width:56px; height:56px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 18px 48px rgba(0,0,0,.40);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color:rgba(238,247,255,.94);
+      font-weight:950;
+      font-size:18px;
+      display:grid; place-items:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action:none;
+      position:relative;
+      overflow:hidden;
+    }
+    .tbtn:before{
+      content:"";
+      position:absolute; inset:-40px;
+      background:
+        radial-gradient(240px 90px at 30% 20%, rgba(255,179,217,.18), transparent 60%),
+        radial-gradient(240px 90px at 70% 80%, rgba(116,255,213,.14), transparent 60%);
+      opacity:.78;
+      pointer-events:none;
+    }
+    .tbtn.big{ width:66px; height:66px; border-radius:22px; font-size:20px; }
+    .tbtn.heart{
+      width:66px; height:66px;
+      background: linear-gradient(180deg, rgba(255,179,217,.16), rgba(116,255,213,.12));
+    }
+    .tbtn:active{ transform: translateY(1px) scale(.99); }
+
+    @media (pointer:coarse){
+      .touch{ display:flex; }
+      .kbd{ display:none; }
+      .sub{ max-width: 62vw; }
+    }
+    @media (max-width:520px){
+      .hud{ flex-direction:column; align-items:stretch; }
+      .progress{ align-items:flex-start; max-width:100%; }
+      .mini{ text-align:left; }
+      .bar{ width:min(520px, 92vw); }
+    }
+  </style>
+</head>
+
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div class="badge">
+      <div class="title">🐾 Carol + Helder <small>— floresta encantada</small></div>
+      <div class="sub" id="subText">
+        Segue a Carol. Lê as plaquinhas. Quando chegares ao portal, entra. Lá dentro, protege-se com gestos pequenos.
+      </div>
+      <div class="kbd">
+        <span class="key">← →</span> ou <span class="key">A D</span> andar
+        <span class="key">↑</span>/<span class="key">W</span>/<span class="key">Espaço</span> saltar (segura = salto maior)
+        <span class="key">↓</span> interagir/ler/entrar
+        <span class="key">C</span> cuddle
+        <span class="key">R</span> recomeçar
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="toolbar">
+        <button class="pill" id="audioBtn" aria-label="Som">
+          <span class="dot" id="audioDot"></span> Som: <span id="audioLabel">toca para ligar</span>
+        </button>
+        <button class="pill" id="cuteBtn" aria-label="Modo fofura">
+          ✨ Encanto: <span id="cuteLabel">ON</span>
+        </button>
+      </div>
+      <div class="bar" aria-label="Progresso"><i id="barFill"></i></div>
+      <div class="mini" id="miniText">Placas: 0 / 9 • Corações: 0 • Cena: Floresta</div>
+    </div>
+  </div>
+
+  <div class="dialog" id="dialog" style="display:none">
+    <div class="panel">
+      <div class="who">
+        <span class="tag plaque" id="speakerTag">Placa</span>
+        <span class="hint" id="hintText">↓ para interagir • ↑ para fechar</span>
+      </div>
+      <div class="text" id="dialogText"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="letter">
+    <div class="sheet">
+      <h1>🌿 A nossa casa (agora é um lugar vivo)</h1>
+      <p id="letterText"></p>
+      <div class="actions">
+        <button class="btn" id="copyBtn">Copiar carta</button>
+        <button class="btn primary" id="againBtn">Jogar outra vez</button>
+        <button class="btn danger" id="closeBtn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="touch" id="touch">
+    <div class="pad">
+      <div class="tbtn" data-k="left">←</div>
+      <div class="tbtn" data-k="right">→</div>
+      <div class="tbtn big" data-k="jump">↑</div>
+    </div>
+    <div class="pad">
+      <div class="tbtn heart" data-k="interact">💬</div>
+      <div class="tbtn heart" data-k="cuddle">🤍</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ==========================================================
+  //  Carol + Helder — Enchanted Forest Edition 🐾✨🌿
+  //  Single-file • PC + Mobile • Pixel vibe
+  //  FOCO: ambiente ultra vivo + fofo + mágico
+  // ==========================================================
+
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d', { alpha: true });
+
+  const barFill = document.getElementById('barFill');
+  const miniText = document.getElementById('miniText');
+  const dialog = document.getElementById('dialog');
+  const dialogText = document.getElementById('dialogText');
+  const speakerTag = document.getElementById('speakerTag');
+  const hintText = document.getElementById('hintText');
+  const subText = document.getElementById('subText');
+
+  const letter = document.getElementById('letter');
+  const letterText = document.getElementById('letterText');
+  const copyBtn = document.getElementById('copyBtn');
+  const againBtn = document.getElementById('againBtn');
+  const closeBtn = document.getElementById('closeBtn');
+
+  const touch = document.getElementById('touch');
+
+  const audioBtn = document.getElementById('audioBtn');
+  const audioDot = document.getElementById('audioDot');
+  const audioLabel = document.getElementById('audioLabel');
+
+  const cuteBtn = document.getElementById('cuteBtn');
+  const cuteLabel = document.getElementById('cuteLabel');
+
+  // -------------------------
+  // Texto (mantive o tom: emotivo, constante, sem exagero)
+  // -------------------------
+  const FULL_LETTER =
+`Carol,
+
+Eu tenho pensado muito em nós, e em mim.
+
+Não para encontrar justificações, não para explicar demais.
+Mas para perceber onde eu preciso realmente de crescer.
+
+Há momentos em que eu falhei contigo.
+Momentos em que, quando tu estavas a sentir algo, eu tentei resolver em vez de acolher.
+Tentei acelerar em vez de respeitar o teu tempo, tentei aliviar a tensão em vez de simplesmente ficar presente.
+
+E nesses momentos, eu não te dei a segurança que merecias.
+
+Eu sei que segurança não se promete, constrói-se.
+E eu sei que, quando eu reajo por impulso, quando quero fechar logo a conversa ou aliviar o desconforto rapidamente, isso pode fazer-te 
+sentir sozinha dentro da relação. Mesmo estando comigo.
+
+Esse trabalho é meu.
+Não é teu ter de me ensinar, de repetir, nem de aguentar até eu perceber.
+
+Eu quero aprender a abrandar, a ouvir até ao fim, 
+a não discutir sentimentos, a não transformar a tua dor numa defesa minha.
+
+Tu tens sido paciente comigo, e eu reconheço isso.
+E reconheço também que o facto de nao me conseguires perdoares não apaga a responsabilidade que eu tenho de melhorar.
+reconheço tambem o teu esforço diariamente para conseguires falar comigo diariamente, a tua presença e bem-estar perante comigo.
+
+Eu não te escrevo isto para pedir que fiques melhor depressa.
+Nem para pedir que confies imediatamente.
+
+Escrevo porque quero que saibas que eu vejo.
+Vejo onde falhei.. Vejo o que preciso de mudar.
+E quero fazer esse caminho de forma consistente, 
+não só quando temos medo de nos perder.
+
+Eu amo-te.
+E amar-te, para mim, também é isto:
+ser adulto o suficiente para assumir,
+ser humilde o suficiente para crescer,
+e ser estável o suficiente para te dar 
+um lugar onde possas respirar.
+
+Eu estou aqui, mesmo que nao aredites plenamente nisso, com calma, 
+com responsabilidade. E com vontade real de ser melhor para nós, daariamente,
+fazendo o meu trabalho enquanto teu namorado.
+
+Helder 🐾`;
+
+  const PLAQUES = [
+    { who:'Placa',  text:'🌿 Caminho da Floresta\nAqui a regra é simples:\ncarinho primeiro, reflexão depois.' },
+    { who:'Helder', text:'Carol… eu não espero resposta agora.\nEu só quero ser claro:\nquando tu sentes, eu tenho de respeitar e ficar.' },
+    { who:'Helder', text:'Eu reconheço que, nas discussões,\neu nem sempre te dei segurança.\nE isso não é justo para ti.' },
+    { who:'Helder', text:'Se eu te fiz sentir pressionada,\nou pouco ouvida… eu lamento.\nEu quero aprender a ouvir melhor os teus sentimentos.' },
+    { who:'Helder', text:'Eu não quero “resolver-te”.\nQuero ouvir.\ne deixar o teu sentir existir sem medo.' },
+    { who:'Helder', text:'Quando eu escorregar,\eu não vou tentar compensar.\nVou assumir: “desculpa, vou fazer melhor”.' },
+    { who:'Placa',  text:'🫧 Nota pequenina\nÀs vezes, segurança é só isto:\nficar… e não fugir do silêncio.' },
+    { who:'Helder', text:'Eu quero ser melhor.\nPor nós.\nPara tu te sentires em casa, mesmo quando é difícil, mas por mim.' },
+    { who:'Placa',  text:'✨ O Portal da Clareira\nEntra quando estiveres pronto.\nLá dentro, protege-se com gestos pequenos.' },
+  ];
+
+  // -------------------------
+  // Mundo / cenas
+  // -------------------------
+  const SCENE = { OUT:'FLORESTA', IN:'CLAREIRA' };
+  const WORLDS = {
+    [SCENE.OUT]: { w: 5200, h: 720, gravity: 0.48, friction: 0.84, air: 0.93 },
+    [SCENE.IN]:  { w: 2100, h: 720, gravity: 0.46, friction: 0.86, air: 0.94 }
+  };
+  let scene = SCENE.OUT;
+
+  // Pixel scaling
+  let DPR = Math.min(2, window.devicePixelRatio || 1);
+  let VW = 960, VH = 540;
+
+  function resize(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+
+    const targetShort = Math.min(w, h);
+    const base = targetShort < 520 ? 360 : 520;
+    const aspect = w / h;
+
+    VH = Math.round(base);
+    VW = Math.round(base * aspect);
+
+    canvas.width  = Math.floor(VW * DPR);
+    canvas.height = Math.floor(VH * DPR);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.imageSmoothingEnabled = false;
+  }
+  window.addEventListener('resize', resize, {passive:true});
+  resize();
+
+  // -------------------------
+  // Input
+  // -------------------------
+  const keys = new Set();
+  const pressed = new Set();
+  let pointerDown = false;
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    keys.add(k);
+    pressed.add(k);
+    if (['arrowleft','arrowright','arrowup','arrowdown',' '].includes(e.key)) e.preventDefault();
+  }, {passive:false});
+
+  window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()), {passive:true});
+
+  function bindTouchButtons(){
+    const map = {
+      left:     ['arrowleft','a'],
+      right:    ['arrowright','d'],
+      jump:     ['arrowup','w',' '],
+      interact: ['arrowdown','s','enter'],
+      cuddle:   ['c']
+    };
+    touch.querySelectorAll('.tbtn').forEach(btn => {
+      const code = btn.getAttribute('data-k');
+      const setDown = () => {
+        pointerDown = true;
+        for(const k of map[code]) keys.add(k);
+        if (code === 'jump') pressed.add(' ');
+        if (code === 'interact') pressed.add('arrowdown');
+        if (code === 'cuddle') pressed.add('c');
+      };
+      const setUp = () => {
+        pointerDown = false;
+        for(const k of map[code]) keys.delete(k);
+      };
+      btn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); btn.setPointerCapture(e.pointerId); setDown(); }, {passive:false});
+      btn.addEventListener('pointerup', (e)=>{ e.preventDefault(); setUp(); }, {passive:false});
+      btn.addEventListener('pointercancel', setUp, {passive:true});
+      btn.addEventListener('pointerleave', ()=>{ if(pointerDown) setUp(); }, {passive:true});
+    });
+  }
+  bindTouchButtons();
+
+  // -------------------------
+  // Utils
+  // -------------------------
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const lerp  = (a,b,t)=>a+(b-a)*t;
+  const rand  = (a,b)=>a+Math.random()*(b-a);
+
+  // -------------------------
+  // Camera
+  // -------------------------
+  const cam = { x:0, y:0, fade:0, fadeTo:0, nextScene:null, bloom:0, rumble:0 };
+  let cuteMode = true;
+
+  cuteBtn.addEventListener('click', () => {
+    cuteMode = !cuteMode;
+    cuteLabel.textContent = cuteMode ? 'ON' : 'OFF';
+  });
+
+  // -------------------------
+  // Audio (mini synth)
+  // -------------------------
+  let audioCtx = null;
+  let audioOn = false;
+
+  function ensureAudio(){
+    if(audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  function beep(freq=660, dur=0.06, type='sine', gain=0.03){
+    if(!audioOn) return;
+    try{
+      ensureAudio();
+      const t0 = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0);
+      o.stop(t0 + dur + 0.02);
+    }catch(e){}
+  }
+  function chord(base=392, dur=0.08){
+    beep(base, dur, 'triangle', 0.012);
+    beep(base*1.25, dur, 'sine', 0.010);
+    beep(base*1.5, dur, 'sine', 0.009);
+  }
+
+  audioBtn.addEventListener('click', () => {
+    audioOn = !audioOn;
+    audioLabel.textContent = audioOn ? 'ligado' : 'desligado';
+    audioDot.style.background = audioOn ? 'rgba(116,255,213,.60)' : 'rgba(255,229,138,.55)';
+    beep(audioOn ? 523 : 220, 0.05, 'triangle', 0.02);
+  });
+
+  // soft loop
+  let musicTimer = 0;
+  const musicPattern = [
+    {f:392, d:0.10, t:'triangle', g:0.012},
+    {f:494, d:0.08, t:'triangle', g:0.010},
+    {f:587, d:0.10, t:'sine',     g:0.010},
+    {f:740, d:0.08, t:'triangle', g:0.010},
+    {f:587, d:0.10, t:'sine',     g:0.009},
+    {f:494, d:0.10, t:'triangle', g:0.009},
+    {f:440, d:0.12, t:'sine',     g:0.008},
+    {f:494, d:0.10, t:'triangle', g:0.009},
+  ];
+  let musicIndex = 0;
+
+  // -------------------------
+  // Dialogue state
+  // -------------------------
+  let activePlaque = null;
+  let showDialog = false;
+  let letterOpen = false;
+
+  function openDialog(who, text, hint='↑ para fechar'){
+    showDialog = true;
+    dialog.style.display = '';
+    if(who === 'Carol'){
+      speakerTag.textContent = 'Carol 🐾';
+      speakerTag.className = 'tag carol';
+    }else if(who === 'Helder'){
+      speakerTag.textContent = 'Helder 🐾';
+      speakerTag.className = 'tag helder';
+    }else{
+      speakerTag.textContent = 'Placa ✨';
+      speakerTag.className = 'tag plaque';
+    }
+    hintText.textContent = hint;
+    dialogText.textContent = text;
+  }
+  function closeDialog(){
+    showDialog = false;
+    dialog.style.display = 'none';
+    activePlaque = null;
+  }
+  function openLetter(){
+    letterOpen = true;
+    letter.style.display = 'grid';
+    letterText.textContent = FULL_LETTER;
+    chord(523,0.09); chord(659,0.08);
+    cam.bloom = Math.max(cam.bloom, 0.9);
+  }
+  function closeLetter(){
+    letterOpen = false;
+    letter.style.display = 'none';
+  }
+  copyBtn.addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(FULL_LETTER);
+      copyBtn.textContent = 'Copiado ✅';
+      setTimeout(()=>copyBtn.textContent='Copiar carta', 1200);
+      beep(990,0.05,'triangle',0.02);
+    }catch{
+      copyBtn.textContent = 'Não deu (browser) 😿';
+      setTimeout(()=>copyBtn.textContent='Copiar carta', 1400);
+    }
+  });
+  againBtn.addEventListener('click', () => restart());
+  closeBtn.addEventListener('click', () => closeLetter());
+
+  // -------------------------
+  // Entities
+  // -------------------------
+  function makeCat(name, colorA, colorB){
+    return {
+      name,
+      x: 110, y: 460,
+      w: 26, h: 18,
+      vx: 0, vy: 0,
+      dir: 1,
+      onGround: false,
+      step: 0,
+
+      blush: 0,
+      sparkle: 0,
+      hearts: 0,
+
+      blink: rand(40, 140),
+      ear: rand(0, 999),
+      breathe: rand(0, 999),
+      tail: rand(0, 999),
+
+      coyote: 0,
+      jumpBuf: 0,
+      jumpHold: 0,
+      canCut: false
+    };
+  }
+
+  const carol  = makeCat('Carol',  '#ffb3d9', '#ffe0f0');
+  const helder = makeCat('Helder', '#74ffd5', '#caffef');
+
+  carol.x = 190;
+  helder.x = 130;
+
+  const lead = { targetSpeed: 1.02, pause: 0 };
+
+  // -------------------------
+  // World content
+  // -------------------------
+  const exterior = {
+    platforms: [
+      {x:0,    y:520, w:1120, h:220},
+      {x:1120, y:520, w:880,  h:220},
+      {x:2000, y:520, w:860,  h:220},
+      {x:2860, y:520, w:820,  h:220},
+      {x:3680, y:520, w:1520, h:220},
+
+      {x:620, y:432, w:210, h:30},
+      {x:900, y:392, w:190, h:30},
+      {x:1220,y:422, w:220, h:30},
+
+      {x:1660,y:420, w:220, h:30},
+      {x:1930,y:372, w:200, h:30},
+      {x:2220,y:410, w:210, h:30},
+
+      {x:2700,y:432, w:210, h:30},
+      {x:2960,y:392, w:190, h:30},
+
+      {x:3380,y:420, w:240, h:30},
+      {x:3680,y:372, w:240, h:30},
+
+      {x:4240,y:432, w:230, h:30},
+      {x:4520,y:392, w:230, h:30}
+    ],
+    portal: { x: 4600, y: 520, w: 320, h: 210 },
+    plaques: [],
+    flora: [],
+    canopy: [],
+    particles: [],
+    critters: []
+  };
+
+  const interior = {
+    platforms: [
+      {x:0, y:540, w:WORLDS[SCENE.IN].w, h:220},
+      {x:0, y:0, w:WORLDS[SCENE.IN].w, h:40},
+      {x:-20,y:0,w:20,h:WORLDS[SCENE.IN].h},
+      {x:WORLDS[SCENE.IN].w,y:0,w:20,h:WORLDS[SCENE.IN].h}
+    ],
+    spots: {
+      pond:   { x: 320, y: 540, w: 260, h: 110 },
+      stump:  { x: 720, y: 540, w: 180, h: 120 },
+      arch:   { x: 1080,y: 540, w: 220, h: 200 },
+      tree:   { x: 1500,y: 540, w: 280, h: 360 },
+
+      frame1: { x: 520, y: 540, w: 90,  h: 160 },
+      frame2: { x: 980, y: 540, w: 90,  h: 160 },
+      frame3: { x: 1840,y: 540, w: 90,  h: 160 },
+    },
+    protect: 0,
+    particles: [],
+    flora: [],
+    critters: [],
+    memoriesFound: { frame1:false, frame2:false, frame3:false }
+  };
+
+  // plaques spacing
+  const plaqueSpacing = (WORLDS[SCENE.OUT].w - 700) / (PLAQUES.length);
+  for(let i=0;i<PLAQUES.length;i++){
+    exterior.plaques.push({
+      id:i,
+      x: 340 + i*plaqueSpacing + rand(-35,35),
+      y: 520,
+      w: 28, h: 40,
+      read:false,
+      glow:0
+    });
+  }
+
+  // ----------------------------------------------------------
+  //  AMBIENTE ULTRA VIVO: FLORESTA (EXTERIOR)
+  // ----------------------------------------------------------
+  // canopy (camadas de árvores) + flora (erva, arbustos, cogumelos)
+  for(let i=0;i<150;i++){
+    exterior.canopy.push({
+      x: rand(0, WORLDS[SCENE.OUT].w),
+      y: rand(40, 260),
+      s: rand(0.8, 2.0),
+      d: rand(0.2, 0.9),
+      seed: rand(0,999),
+      kind: Math.random()<0.6 ? 'crown' : 'branch'
+    });
+  }
+  for(let i=0;i<520;i++){
+    const kind = (Math.random()<0.56) ? 'grass' : (Math.random()<0.78 ? 'flower' : (Math.random()<0.9 ? 'mush' : 'fern'));
+    exterior.flora.push({
+      kind,
+      x: rand(0, WORLDS[SCENE.OUT].w),
+      y: 520,
+      s: rand(0.65, 1.65),
+      seed: rand(0,999)
+    });
+  }
+
+  // ----------------------------------------------------------
+  //  CLAREIRA (INTERIOR) — AGORA É ENCANTADA E VIVA
+  // ----------------------------------------------------------
+  for(let i=0;i<420;i++){
+    const kind = (Math.random()<0.60) ? 'grass' : (Math.random()<0.78 ? 'flower' : (Math.random()<0.92 ? 'mush' : 'sparkroot'));
+    interior.flora.push({
+      kind,
+      x: rand(0, WORLDS[SCENE.IN].w),
+      y: 540,
+      s: rand(0.70, 1.80),
+      seed: rand(0,999)
+    });
+  }
+
+  // Particles (vaga-lumes, pó mágico, pétalas, névoa)
+  function spawnParticles(arr, count, worldW, mode){
+    for(let i=0;i<count;i++){
+      const kind =
+        mode === 'mist' ? 'mist' :
+        (Math.random()<0.40 ? 'firefly' : (Math.random()<0.66 ? 'petal' : (Math.random()<0.84 ? 'spark' : 'bokeh')));
+      arr.push({
+        x: rand(0, worldW),
+        y: rand(30, 360),
+        vx: rand(-0.30,0.30),
+        vy: rand(-0.10,0.10),
+        t: rand(0,999),
+        kind,
+        seed: rand(0,999),
+        a: rand(0.18, 0.65),
+        r: rand(2, 5)
+      });
+    }
+  }
+  spawnParticles(exterior.particles, 220, WORLDS[SCENE.OUT].w);
+  spawnParticles(exterior.particles, 40,  WORLDS[SCENE.OUT].w, 'mist');
+  spawnParticles(interior.particles, 180, WORLDS[SCENE.IN].w);
+  spawnParticles(interior.particles, 52,  WORLDS[SCENE.IN].w, 'mist');
+
+  // Critters: coelhos, pássaros, borboletas (ambiente vivo)
+  function addCritters(target, worldW, count){
+    for(let i=0;i<count;i++){
+      const type = Math.random()<0.40 ? 'butterfly' : (Math.random()<0.70 ? 'bird' : 'bunny');
+      target.push({
+        type,
+        x: rand(0, worldW),
+        y: (type==='bird') ? rand(90, 220) : rand(470, 520),
+        vx: rand(0.3, 1.2) * (Math.random()<0.5?-1:1),
+        vy: rand(-0.15, 0.15),
+        t: rand(0,999),
+        seed: rand(0,999),
+        dir: 1
+      });
+    }
+  }
+  addCritters(exterior.critters, WORLDS[SCENE.OUT].w, 26);
+  addCritters(interior.critters, WORLDS[SCENE.IN].w, 18);
+
+  // extra: heart confetti
+  const confetti = [];
+  function burstHearts(x,y, power=1){
+    if(!cuteMode) return;
+    const n = Math.floor(12 + 22*power);
+    for(let i=0;i<n;i++){
+      confetti.push({
+        x, y,
+        vx: rand(-1.7,1.7) * (0.6+power),
+        vy: rand(-2.8,-0.8) * (0.7+power),
+        g: rand(0.06,0.10),
+        life: rand(520, 980),
+        t: rand(0,999),
+        kind: Math.random()<0.55?'heart':'spark'
+      });
+    }
+  }
+
+  // -------------------------
+  // Game progress
+  // -------------------------
+  let readCount = 0;
+  let cuddleCount = 0;
+  let portalUnlocked = false;
+
+  // -------------------------
+  // Physics
+  // -------------------------
+  function aabb(ax,ay,aw,ah, bx,by,bw,bh){
+    return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+  }
+  function worldNow(){ return WORLDS[scene]; }
+  function platformsNow(){ return (scene === SCENE.OUT) ? exterior.platforms : interior.platforms; }
+
+  function resolveEntity(e){
+    const W = worldNow();
+    e.onGround = false;
+
+    e.x += e.vx;
+    for(const p of platformsNow()){
+      if(aabb(e.x, e.y, e.w, e.h, p.x, p.y, p.w, p.h)){
+        if(e.vx > 0) e.x = p.x - e.w;
+        if(e.vx < 0) e.x = p.x + p.w;
+        e.vx = 0;
+      }
+    }
+
+    e.y += e.vy;
+    for(const p of platformsNow()){
+      if(aabb(e.x, e.y, e.w, e.h, p.x, p.y, p.w, p.h)){
+        if(e.vy > 0){
+          e.y = p.y - e.h;
+          e.vy = 0;
+          e.onGround = true;
+        }else if(e.vy < 0){
+          e.y = p.y + p.h;
+          e.vy = 0;
+        }
+      }
+    }
+
+    e.x = clamp(e.x, 0, W.w - e.w);
+    if(e.y > W.h + 300) restart();
+  }
+
+  // -------------------------
+  // Interactions
+  // -------------------------
+  function nearestPlaque(e, dist){
+    if(scene !== SCENE.OUT) return null;
+    let best = null, bestD = Infinity;
+    for(const p of exterior.plaques){
+      const px = p.x + p.w/2;
+      const ex = e.x + e.w/2;
+      const d = Math.abs(px - ex);
+      const dy = Math.abs((p.y - 40) - e.y);
+      if(d < dist && dy < 90){
+        if(d < bestD){ bestD = d; best = p; }
+      }
+    }
+    return best;
+  }
+
+  function readPlaque(pl){
+    const entry = PLAQUES[pl.id];
+    activePlaque = pl;
+    openDialog(entry.who, entry.text, '↑ para fechar • (sem pressa)');
+    if(!pl.read){
+      pl.read = true;
+      readCount++;
+      helder.hearts += 1;
+      helder.sparkle = 1;
+      carol.blush = 1;
+      if(cuteMode) cam.bloom = Math.max(cam.bloom, 0.60);
+      chord(587, 0.08);
+      burstHearts(helder.x+helder.w/2, helder.y-8, 0.6);
+    }
+    if(readCount >= PLAQUES.length) portalUnlocked = true;
+  }
+
+  function fadeToScene(next){
+    if(scene === next) return;
+    cam.fadeTo = 1;
+    cam.nextScene = next;
+  }
+
+  function switchScene(next){
+    scene = next;
+    closeDialog();
+
+    if(scene === SCENE.IN){
+      carol.x = 520; carol.y = 500; carol.vx=0; carol.vy=0;
+      helder.x = 460; helder.y = 500; helder.vx=0; helder.vy=0;
+      subText.textContent = 'Clareira encantada 🌿 Faz cuddle (C) e enche a “Proteção” com gestos pequenos.';
+    }else{
+      carol.x = 190; carol.y = 460; carol.vx=0; carol.vy=0;
+      helder.x = 130; helder.y = 460; helder.vx=0; helder.vy=0;
+      subText.textContent = 'Segue a Carol. Lê as plaquinhas. Quando chegares ao portal, entra. Lá dentro, protege-se com gestos pequenos.';
+    }
+    cam.x = 0; cam.y = 0;
+  }
+
+  // -------------------------
+  // Player update
+  // -------------------------
+  function updatePlayer(dt){
+    if(letterOpen) return;
+
+    const left  = keys.has('arrowleft') || keys.has('a');
+    const right = keys.has('arrowright')|| keys.has('d');
+
+    const jumpPressed = pressed.has(' ') || pressed.has('arrowup') || pressed.has('w');
+    const jumpHeld    = keys.has(' ') || keys.has('arrowup') || keys.has('w');
+
+    const interact = pressed.has('arrowdown') || pressed.has('s') || pressed.has('enter');
+    const cuddle   = pressed.has('c');
+
+    if((pressed.has('arrowup') || pressed.has('w')) && showDialog) closeDialog();
+
+    if(interact){
+      if(scene === SCENE.OUT){
+        const p = nearestPlaque(helder, 54);
+        if(p){
+          if(showDialog && activePlaque && activePlaque.id === p.id) closeDialog();
+          else readPlaque(p);
+        }else if(portalUnlocked){
+          const P = exterior.portal;
+          const zone = { x:P.x+96, y:P.y-150, w:P.w-192, h:220 };
+          if(aabb(helder.x,helder.y,helder.w,helder.h, zone.x, zone.y, zone.w, zone.h)){
+            openDialog('Placa', '✨ Portal da Clareira\nEntra quando estiveres pronto.\n(↓ outra vez para entrar)', '↓ para entrar • ↑ para fechar');
+            if(activePlaque === 'PORTAL_CONFIRM'){
+              chord(659,0.09);
+              fadeToScene(SCENE.IN);
+            }else{
+              activePlaque = 'PORTAL_CONFIRM';
+              beep(740,0.05,'triangle',0.018);
+              cam.bloom = Math.max(cam.bloom, 0.6);
+            }
+          }
+        }
+      }else{
+        const s = interior.spots;
+
+        if(interior.protect >= 0.98){
+          openDialog('Placa', '✨ Está quentinho aqui…\nSe quiseres, abre a carta.', '↓ para abrir carta • ↑ para fechar');
+          if(activePlaque === 'LETTER_CONFIRM'){
+            openLetter();
+          }else{
+            activePlaque = 'LETTER_CONFIRM';
+          }
+          return;
+        }
+
+        const memory = (id, txt) => {
+          interior.memoriesFound[id] = true;
+          openDialog('Placa', txt, '↑ para fechar • (pequeno e verdadeiro)');
+          if(cuteMode) cam.bloom = Math.max(cam.bloom, 0.72);
+          burstHearts(helder.x+helder.w/2, helder.y-10, 0.75);
+          chord(494, 0.08);
+        };
+
+        if(aabb(helder.x,helder.y,helder.w,helder.h, s.pond.x, s.pond.y-140, s.pond.w, 190)){
+          openDialog('Placa', '💧 Lago\nAqui a pressa dissolve.\nRespira. Ouve. Fica.', 'C para cuddle • ↑ para fechar');
+          beep(587,0.06,'sine',0.011);
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.stump.x, s.stump.y-160, s.stump.w, 210)){
+          openDialog('Placa', '🌳 Tronco\nUm lugar simples.\nGesto simples.\nÉ assim que a confiança cresce.', 'C para cuddle • ↑ para fechar');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.arch.x, s.arch.y-220, s.arch.w, 260)){
+          openDialog('Placa', '🌿 Arco de folhas\nQuando o orgulho sobe,\npassa por baixo.\nE volta ao “calmo”.', 'C para cuddle • ↑ para fechar');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.tree.x, s.tree.y-300, s.tree.w, 360)){
+          openDialog('Placa', '🌲 Árvore-Mãe\nAqui é o “porto”.\nEu fico.\nMesmo quando é difícil.', 'C para cuddle • ↑ para fechar');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.frame1.x, s.frame1.y-220, s.frame1.w, 260)){
+          memory('frame1', '🖼️ Memória 1\n“Eu estou contigo, mesmo quando eu aprendo devagar.\nO meu amor não desaparece nos dias difíceis.”');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.frame2.x, s.frame2.y-220, s.frame2.w, 260)){
+          memory('frame2', '🖼️ Memória 2\n“Eu quero ser calmo contigo.\nQuero que sintas que podes falar… e eu fico.”');
+        }else if(aabb(helder.x,helder.y,helder.w,helder.h, s.frame3.x, s.frame3.y-220, s.frame3.w, 260)){
+          memory('frame3', '🖼️ Memória 3\n“Segurança é repetição:\nouvir, abrandar, assumir, cuidar.”');
+        }else{
+          if(helder.x < 120){
+            openDialog('Placa', '🚪 Voltar à floresta\nPodemos sair quando quiseres.\n(↓ outra vez para sair)', '↓ para sair • ↑ para fechar');
+            if(activePlaque === 'EXIT_CONFIRM'){
+              fadeToScene(SCENE.OUT);
+            }else{
+              activePlaque = 'EXIT_CONFIRM';
+              beep(392,0.05,'triangle',0.016);
+            }
+          }
+        }
+      }
+    }
+
+    if(cuddle){
+      const dx = Math.abs((helder.x+helder.w/2)-(carol.x+carol.w/2));
+      const dy = Math.abs((helder.y)-(carol.y));
+      if(dx < 48 && dy < 46){
+        cuddleCount++;
+        helder.hearts += 1;
+        helder.sparkle = 1;
+        carol.blush = 1;
+
+        cam.rumble = Math.max(cam.rumble, 0.9);
+        if(cuteMode) cam.bloom = Math.max(cam.bloom, 0.92);
+        burstHearts(helder.x+helder.w/2, helder.y-6, 1.1);
+
+        if(scene === SCENE.IN){
+          const memBonus = (interior.memoriesFound.frame1?0.02:0) + (interior.memoriesFound.frame2?0.02:0) + (interior.memoriesFound.frame3?0.02:0);
+          interior.protect = clamp(interior.protect + 0.09 + memBonus, 0, 1);
+          openDialog('Placa', '🤍 Cuddle\nAqui eu aprendo a ficar.\nSem pressa.\nSem te pedir para carregares nada por mim.', '↑ para fechar');
+        }else{
+          openDialog('Placa', '🤍 Cuddle\nPequeno gesto.\nMas é isto que eu quero repetir:\ncalma + cuidado.', '↑ para fechar');
+        }
+        chord(740,0.07);
+      }else{
+        openDialog('Placa', 'Chega-te mais à Carol para fazer cuddle 🤍', '↑ para fechar');
+        beep(330,0.06,'sine',0.012);
+      }
+    }
+
+    // Movement & jump feel
+    const W = worldNow();
+
+    if(helder.onGround) helder.coyote = 120;
+    else helder.coyote = Math.max(0, helder.coyote - dt);
+
+    if(jumpPressed) helder.jumpBuf = 130;
+    else helder.jumpBuf = Math.max(0, helder.jumpBuf - dt);
+
+    const accel = helder.onGround ? 0.46 : 0.24;
+    if(left)  { helder.vx -= accel; helder.dir = -1; }
+    if(right) { helder.vx += accel; helder.dir =  1; }
+
+    if(helder.jumpBuf > 0 && helder.coyote > 0){
+      helder.jumpBuf = 0;
+      helder.coyote = 0;
+      helder.vy = -8.2;
+      helder.canCut = true;
+      helder.jumpHold = 165;
+      beep(740,0.05,'triangle',0.018);
+    }
+
+    if(helder.jumpHold > 0 && jumpHeld){
+      helder.jumpHold -= dt;
+      helder.vy -= 0.06;
+    }else{
+      helder.jumpHold = 0;
+    }
+
+    if(!jumpHeld && helder.canCut && helder.vy < -2.0){
+      helder.vy *= 0.72;
+      helder.canCut = false;
+    }
+
+    helder.vx *= helder.onGround ? W.friction : W.air;
+    helder.vx = clamp(helder.vx, -3.8, 3.8);
+
+    helder.vy += W.gravity;
+    helder.vy = clamp(helder.vy, -18, 14);
+
+    resolveEntity(helder);
+
+    helder.sparkle = Math.max(0, helder.sparkle - dt*0.0023);
+    carol.blush = Math.max(0, carol.blush - dt*0.0020);
+  }
+
+  // -------------------------
+  // Carol AI
+  // -------------------------
+  function updateCarol(dt){
+    if(letterOpen) return;
+    const W = worldNow();
+
+    if(scene === SCENE.OUT){
+      const nearPlaque = nearestPlaque(carol, 48);
+      const nearHelder = Math.abs((carol.x+carol.w/2) - (helder.x+helder.w/2)) < 150;
+
+      if(nearPlaque && !nearPlaque.read && (nearPlaque.x - carol.x) < 34){
+        lead.pause = Math.max(lead.pause, 520);
+      }
+      if(showDialog) lead.pause = Math.max(lead.pause, 220);
+
+      const gap = (carol.x - helder.x);
+      const desired = gap > 320 ? 0.74 : (gap < 140 ? 1.02 : lead.targetSpeed);
+
+      if(lead.pause > 0){
+        lead.pause -= dt;
+        carol.vx *= 0.84;
+      }else{
+        carol.vx = lerp(carol.vx, desired, 0.08);
+      }
+
+      if(carol.onGround && Math.random()<0.0021 && nearHelder){
+        carol.vy = -6.9;
+        beep(990,0.04,'sine',0.009);
+      }
+
+      carol.vy += W.gravity;
+      carol.vy = clamp(carol.vy, -18, 14);
+
+      resolveEntity(carol);
+
+      if(carol.x < helder.x + 72) carol.x = helder.x + 72;
+      carol.dir = 1;
+
+    }else{
+      const target = helder.x + 34;
+      carol.vx = lerp(carol.vx, clamp((target - carol.x) * 0.03, -1.4, 1.4), 0.10);
+
+      if(carol.onGround && Math.random()<0.0016){
+        carol.vy = -6.2;
+        beep(660,0.04,'triangle',0.008);
+      }
+
+      carol.vy += W.gravity;
+      carol.vy = clamp(carol.vy, -18, 14);
+      resolveEntity(carol);
+
+      carol.dir = (helder.x - carol.x) >= 0 ? 1 : -1;
+
+      if(interior.protect < 0.98){
+        interior.protect = clamp(interior.protect + dt * 0.000006, 0, 1);
+      }
+    }
+  }
+
+  // -------------------------
+  // Restart
+  // -------------------------
+  function restart(){
+    closeDialog();
+    closeLetter();
+
+    scene = SCENE.OUT;
+    cam.x=0; cam.y=0; cam.fade=0; cam.fadeTo=0; cam.nextScene=null; cam.bloom=0; cam.rumble=0;
+
+    carol.x=190; carol.y=460; carol.vx=0; carol.vy=0; carol.dir=1; carol.onGround=false; carol.blush=0;
+    helder.x=130; helder.y=460; helder.vx=0; helder.vy=0; helder.dir=1; helder.onGround=false; helder.sparkle=0; helder.hearts=0;
+
+    for(const p of exterior.plaques){ p.read=false; p.glow=0; }
+    readCount = 0; cuddleCount = 0; portalUnlocked = false;
+
+    interior.protect = 0;
+    interior.memoriesFound.frame1 = false;
+    interior.memoriesFound.frame2 = false;
+    interior.memoriesFound.frame3 = false;
+
+    lead.pause = 0;
+    confetti.length = 0;
+
+    subText.textContent = 'Segue a Carol. Lê as plaquinhas. Quando chegares ao portal, entra. Lá dentro, protege-se com gestos pequenos.';
+    beep(392,0.06,'sine',0.02);
+  }
+
+  // -------------------------
+  // Drawing helpers
+  // -------------------------
+  function pxRect(x,y,w,h, c, a=1){
+    ctx.globalAlpha=a; ctx.fillStyle=c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    ctx.globalAlpha=1;
+  }
+  function pxStrokeRect(x,y,w,h, c, a=1){
+    ctx.globalAlpha=a; ctx.strokeStyle=c;
+    ctx.lineWidth=1;
+    ctx.strokeRect(Math.round(x)+0.5, Math.round(y)+0.5, Math.round(w)-1, Math.round(h)-1);
+    ctx.globalAlpha=1;
+  }
+  function pxCircle(x,y,r, c, a=1){
+    ctx.globalAlpha=a; ctx.fillStyle=c;
+    ctx.beginPath(); ctx.arc(Math.round(x), Math.round(y), r, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  // -------------------------
+  // Enchanted backgrounds
+  // -------------------------
+  function drawGradientSky(t, warm){
+    // céu mais rico, com aurora e “glow”
+    const g = ctx.createLinearGradient(0,0,0,VH);
+    if(warm){
+      g.addColorStop(0, '#06131a');
+      g.addColorStop(0.45, '#0c2a2b');
+      g.addColorStop(1, '#061018');
+    }else{
+      g.addColorStop(0, '#060f18');
+      g.addColorStop(0.45, '#0b2030');
+      g.addColorStop(1, '#061018');
+    }
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,VW,VH);
+
+    // aurora ribbons
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = 'rgba(116,255,213,.07)';
+    ctx.beginPath();
+    ctx.moveTo(0, VH*0.18);
+    for(let x=0;x<=VW;x+=22){
+      const y = VH*0.18 + Math.sin((x*0.016)+(t*0.0013))*16 + Math.sin((x*0.006)-(t*0.0010))*10;
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(VW,0); ctx.lineTo(0,0); ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,179,217,.06)';
+    ctx.beginPath();
+    ctx.moveTo(0, VH*0.26);
+    for(let x=0;x<=VW;x+=22){
+      const y = VH*0.26 + Math.sin((x*0.014)+(t*0.0011))*18 + Math.sin((x*0.006)+(t*0.0007))*10;
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(VW,0); ctx.lineTo(0,0); ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // estrelas suaves
+    for(let i=0;i<150;i++){
+      const sx = (i*77.3 + (t*0.02)) % VW;
+      const sy = (i*43.7) % (VH*0.58);
+      const tw = (Math.sin(t*0.004 + i)*0.5+0.5);
+      pxRect(sx, sy, 1, 1, 'rgba(255,255,255,.95)', 0.10 + 0.55*tw);
+      if(cuteMode && tw>0.86) pxRect(sx+1, sy, 1, 1, 'rgba(255,229,138,.9)', 0.18);
+    }
+
+    // lua + halo
+    const mx = VW*0.80, my = VH*0.17;
+    pxCircle(mx, my, 34, 'rgba(255,229,138,.13)', 1);
+    pxCircle(mx-6, my-6, 24, 'rgba(255,255,255,.08)', 1);
+    pxCircle(mx-2, my-2, 19, 'rgba(255,229,138,.12)', 1);
+  }
+
+  function drawHills(t, layer, color, yBase){
+    const speed = (0.10 + layer*0.22);
+    const off = (cam.x*layer*0.60 + t*speed*0.02);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, VH*yBase);
+    for(let x=0;x<=VW;x+=22){
+      const y = VH*yBase + Math.sin((x*0.012)+off)*18 + Math.sin((x*0.004)-off*1.2)*10;
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(VW, VH); ctx.lineTo(0, VH); ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawForestBackdrop(t){
+    drawGradientSky(t, false);
+
+    // montes mais verdes
+    drawHills(t, 0.18, '#0a1b24', 0.38);
+    drawHills(t, 0.35, '#0c2630', 0.52);
+    drawHills(t, 0.60, '#0f2b34', 0.68);
+
+    // canopy (parallax folhas por cima)
+    for(const c of exterior.canopy){
+      const par = c.d;
+      const x = (c.x - cam.x*par);
+      const y = (c.y - cam.y*par*0.35);
+      if(x < -120 || x > VW+120) continue;
+      const s = c.s;
+
+      const sway = Math.sin(t*0.0012 + c.seed) * 2.4*s;
+      const leafA = 'rgba(116,255,213,.05)';
+      const leafB = 'rgba(255,179,217,.04)';
+      if(c.kind==='crown'){
+        pxRect(x+sway, y, 40*s, 22*s, leafA, 1);
+        pxRect(x+sway+6*s, y+6*s, 28*s, 12*s, leafB, 1);
+      }else{
+        pxRect(x+sway, y, 28*s, 10*s, leafA, 1);
+        pxRect(x+sway+4*s, y+8*s, 18*s, 8*s, leafB, 1);
+      }
+    }
+
+    // névoa em camadas
+    if(cuteMode){
+      const mistA = 0.10 + 0.08*(Math.sin(t*0.0009)*0.5+0.5);
+      pxRect(0, VH*0.62, VW, VH*0.38, 'rgba(255,255,255,.03)', mistA);
+      pxRect(0, VH*0.72, VW, VH*0.28, 'rgba(116,255,213,.02)', mistA);
+    }
+  }
+
+  function drawGladeBackdrop(t){
+    // “interior” virou clareira: mais quente e verde
+    drawGradientSky(t, true);
+
+    // glow central (como se fosse magia no chão)
+    const gx = VW*0.52, gy = VH*0.70;
+    pxCircle(gx, gy, 170, 'rgba(116,255,213,.05)', 1);
+    pxCircle(gx, gy, 120, 'rgba(255,229,138,.04)', 1);
+
+    drawHills(t, 0.22, '#09201f', 0.44);
+    drawHills(t, 0.42, '#0b2a24', 0.58);
+    drawHills(t, 0.62, '#0f342b', 0.72);
+
+    // vines + lantern dots
+    for(let i=0;i<26;i++){
+      const x = (i*78 + (t*0.02)) % (VW+100) - 50;
+      const y = 54 + Math.sin(t*0.001 + i)*12;
+      pxRect(x, y, 2, 60, 'rgba(116,255,213,.05)', 1);
+      const tw = (Math.sin(t*0.01 + i)*0.5+0.5);
+      pxRect(x-2, y+28, 1, 1, 'rgba(255,229,138,.9)', 0.10 + 0.40*tw);
+    }
+
+    // neblina suave
+    const a = 0.12 + 0.10*(Math.sin(t*0.0011)*0.5+0.5);
+    pxRect(0, VH*0.66, VW, VH*0.34, 'rgba(255,255,255,.03)', a);
+  }
+
+  // -------------------------
+  // Particles + critters
+  // -------------------------
+  function particlesNow(){ return (scene === SCENE.OUT) ? exterior.particles : interior.particles; }
+  function crittersNow(){ return (scene === SCENE.OUT) ? exterior.critters : interior.critters; }
+
+  function drawParticles(t){
+    const W = worldNow();
+    for(const p of particlesNow()){
+      p.t += 1;
+      const drift = Math.sin((p.t*0.02)+p.seed)*0.05;
+      p.x += p.vx + drift;
+      p.y += p.vy + Math.sin((p.t*0.015)+p.seed)*0.08;
+
+      if(p.x < -40) p.x = W.w + 40;
+      if(p.x > W.w + 40) p.x = -40;
+      if(p.y < 18) p.y = 360;
+      if(p.y > 420) p.y = 22;
+
+      const sx = (p.x - cam.x);
+      const sy = (p.y - cam.y);
+      if(sx < -60 || sx > VW+60) continue;
+
+      if(p.kind === 'mist'){
+        if(!cuteMode) continue;
+        const tw = (Math.sin(p.t*0.006 + p.seed)*0.5+0.5);
+        pxRect(sx-6, sy-2, 18, 6, 'rgba(255,255,255,.02)', (0.10+0.12*tw)*p.a);
+        pxRect(sx-2, sy,   12, 4, 'rgba(116,255,213,.015)', (0.08+0.10*tw)*p.a);
+      }
+      else if(p.kind === 'firefly'){
+        const tw = (Math.sin(p.t*0.04 + p.seed)*0.5+0.5);
+        pxRect(sx, sy, 1, 1, 'rgba(255,229,138,.95)', 0.16 + 0.66*tw);
+        if(cuteMode && tw>0.84) pxRect(sx+1, sy, 1, 1, 'rgba(116,255,213,.9)', 0.14);
+      }else if(p.kind === 'petal'){
+        pxRect(sx, sy, 2, 1, 'rgba(255,179,217,.82)', 0.32);
+      }else if(p.kind === 'bokeh'){
+        if(!cuteMode) continue;
+        const tw = (Math.sin(p.t*0.01 + p.seed)*0.5+0.5);
+        pxCircle(sx, sy, p.r, 'rgba(185,182,255,.06)', 0.20+0.22*tw);
+      }else{
+        pxRect(sx, sy, 1, 1, 'rgba(116,255,213,.85)', 0.25);
+      }
+    }
+
+    // confetti hearts
+    for(let i=confetti.length-1;i>=0;i--){
+      const c = confetti[i];
+      c.t += 1;
+      c.life -= 16;
+      c.vy += c.g;
+      c.x += c.vx;
+      c.y += c.vy;
+
+      const sx = (c.x - cam.x);
+      const sy = (c.y - cam.y);
+      if(c.life <= 0 || sy > VH + 60){
+        confetti.splice(i,1);
+        continue;
+      }
+      const a = clamp(c.life/900, 0, 1);
+
+      if(c.kind === 'heart'){
+        pxRect(sx, sy, 2, 1, 'rgba(255,179,217,.9)', 0.55*a);
+        pxRect(sx+1, sy-1, 1, 2, 'rgba(255,179,217,.9)', 0.55*a);
+        pxRect(sx+2, sy, 2, 1, 'rgba(116,255,213,.9)', 0.35*a);
+      }else{
+        pxRect(sx, sy, 1, 1, 'rgba(255,229,138,.95)', 0.50*a);
+      }
+    }
+  }
+
+  function updateAndDrawCritters(t, dt){
+    const W = worldNow();
+    for(const c of crittersNow()){
+      c.t += 1;
+
+      if(c.type === 'bird'){
+        c.x += c.vx * 1.2;
+        c.y += Math.sin(c.t*0.03 + c.seed)*0.5 + c.vy;
+        if(c.x < -60) c.x = W.w + 60;
+        if(c.x > W.w + 60) c.x = -60;
+        c.dir = c.vx >= 0 ? 1 : -1;
+
+        const sx = c.x - cam.x;
+        const sy = c.y - cam.y;
+        if(sx<-80||sx>VW+80) continue;
+        const flap = (Math.sin(c.t*0.18)*0.5+0.5);
+        pxRect(sx, sy, 6, 2, 'rgba(255,255,255,.12)', 1);
+        pxRect(sx + (c.dir>0?2:-2), sy-1, 2, 1, 'rgba(255,229,138,.12)', 0.9);
+        if(cuteMode){
+          pxRect(sx+2, sy-(flap>0.5?2:1), 2, 1, 'rgba(116,255,213,.10)', 1);
+          pxRect(sx+2, sy+(flap>0.5?2:1), 2, 1, 'rgba(255,179,217,.08)', 1);
+        }
+      }
+
+      if(c.type === 'butterfly'){
+        c.x += c.vx * 0.8;
+        c.y += Math.sin(c.t*0.06 + c.seed)*0.9 + c.vy;
+        if(c.x < -60) c.x = W.w + 60;
+        if(c.x > W.w + 60) c.x = -60;
+        c.dir = c.vx >= 0 ? 1 : -1;
+
+        const sx = c.x - cam.x;
+        const sy = c.y - cam.y;
+        if(sx<-80||sx>VW+80) continue;
+        const flap = (Math.sin(c.t*0.25)*0.5+0.5);
+        pxRect(sx, sy, 1, 1, 'rgba(255,229,138,.25)', 1);
+        pxRect(sx-(flap>0.5?2:1), sy, 2, 1, 'rgba(255,179,217,.16)', 1);
+        pxRect(sx+(flap>0.5?2:1), sy, 2, 1, 'rgba(116,255,213,.14)', 1);
+      }
+
+      if(c.type === 'bunny'){
+        // ground critter: slow + occasional hop
+        if(Math.random()<0.0022){
+          c.vy = -2.0 - Math.random()*1.2;
+        }
+        c.x += c.vx*0.55;
+        c.y += (c.vy||0);
+        c.vy = (c.vy||0) + 0.10;
+        if(c.y > 520) { c.y = 520; c.vy = 0; }
+        if(c.x < 10 || c.x > W.w-10) c.vx *= -1;
+        c.dir = c.vx >= 0 ? 1 : -1;
+
+        const sx = c.x - cam.x;
+        const sy = c.y - cam.y;
+        if(sx<-80||sx>VW+80) continue;
+        pxRect(sx, sy-6, 8, 6, 'rgba(255,255,255,.08)', 1);
+        pxRect(sx+2, sy-10, 1, 4, 'rgba(255,179,217,.10)', 1);
+        pxRect(sx+5, sy-10, 1, 4, 'rgba(255,179,217,.10)', 1);
+        pxRect(sx+3, sy-4, 1, 1, 'rgba(255,229,138,.12)', 1);
+      }
+    }
+  }
+
+  // -------------------------
+  // World drawing: chão + flora + portal
+  // -------------------------
+  function drawPlatform(p, t){
+    const x = p.x - cam.x;
+    const y = p.y - cam.y;
+    if(x+p.w < -80 || x > VW+80) return;
+
+    const isGround = (scene === SCENE.OUT && p.y===520) || (scene === SCENE.IN && p.y===540);
+
+    if(isGround){
+      // chão vivo (erva + terra)
+      pxRect(x, y, p.w, 6, 'rgba(116,255,213,.12)', 1);
+      pxRect(x, y+6, p.w, p.h-6, 'rgba(5,10,14,.38)', 1);
+
+      for(let i=0;i<p.w;i+=6){
+        const wig = Math.sin((i*0.07)+(t*0.004))*1.6;
+        pxRect(x+i, y-3+wig, 2, 3, 'rgba(116,255,213,.14)', 1);
+        if(cuteMode && (i%18===0)) pxRect(x+i+2, y-2+wig, 1, 2, 'rgba(255,179,217,.10)', 1);
+      }
+      // sombras no fundo
+      pxRect(x, y+p.h-10, p.w, 10, 'rgba(0,0,0,.22)', 1);
+      return;
+    }
+
+    // plataformas “naturais”
+    pxRect(x, y, p.w, 5, 'rgba(116,255,213,.10)', 1);
+    pxRect(x, y+5, p.w, p.h-5, 'rgba(10,16,22,.35)', 1);
+    pxRect(x, y+5, p.w, 2, 'rgba(255,255,255,.04)', 1);
+  }
+
+  function drawFlora(list, t){
+    const baseY = (scene===SCENE.OUT ? 520 : 540) - cam.y;
+
+    for(const f of list){
+      const x = f.x - cam.x;
+      if(x < -120 || x > VW+120) continue;
+
+      const s = f.s;
+      const sw = Math.sin(t*0.006 + f.seed) * (0.8*s);
+
+      if(f.kind === 'grass'){
+        // tufo de erva com movimento
+        for(let i=0;i<3;i++){
+          pxRect(x+(i*2*s)+sw, baseY-4*s-(i%2)*2, 1*s, 6*s, 'rgba(116,255,213,.10)', 1);
+        }
+      }else if(f.kind === 'fern'){
+        pxRect(x+sw, baseY-8*s, 10*s, 2*s, 'rgba(47,174,120,.10)', 1);
+        pxRect(x+sw+2*s, baseY-10*s, 6*s, 2*s, 'rgba(116,255,213,.08)', 1);
+      }else if(f.kind === 'flower'){
+        const tw = (Math.sin(t*0.01 + f.seed)*0.5+0.5);
+        pxRect(x+sw, baseY-6*s, 1*s, 6*s, 'rgba(116,255,213,.10)', 1);
+        pxRect(x-2*s+sw, baseY-8*s, 2*s, 2*s, 'rgba(255,179,217,.12)', 0.30+0.35*tw);
+        pxRect(x+1*s+sw, baseY-8*s, 2*s, 2*s, 'rgba(255,229,138,.10)', 0.28+0.33*tw);
+      }else if(f.kind === 'mush'){
+        // cogumelo luminoso
+        const tw = 0.35 + 0.35*(Math.sin(t*0.012 + f.seed)*0.5+0.5);
+        pxRect(x+sw, baseY-6*s, 2*s, 6*s, 'rgba(255,255,255,.06)', 1);
+        pxRect(x-2*s+sw, baseY-10*s, 8*s, 4*s, 'rgba(255,116,184,.10)', 1);
+        if(cuteMode){
+          pxRect(x-6*s+sw, baseY-16*s, 16*s, 12*s, 'rgba(255,229,138,.03)', tw);
+          pxRect(x-7*s+sw, baseY-17*s, 18*s, 14*s, 'rgba(116,255,213,.02)', tw);
+        }
+        // pintinhas
+        pxRect(x+1*s+sw, baseY-9*s, 1*s, 1*s, 'rgba(255,229,138,.14)', 1);
+        pxRect(x+4*s+sw, baseY-9*s, 1*s, 1*s, 'rgba(255,229,138,.12)', 1);
+      }else if(f.kind === 'sparkroot'){
+        // raízes mágicas (clareira)
+        const tw = 0.35 + 0.35*(Math.sin(t*0.010 + f.seed)*0.5+0.5);
+        pxRect(x+sw, baseY-3*s, 10*s, 2*s, 'rgba(116,255,213,.06)', 1);
+        pxRect(x+sw+2*s, baseY-5*s, 6*s, 2*s, 'rgba(255,229,138,.04)', 1);
+        if(cuteMode && tw>0.55) pxRect(x+sw+5*s, baseY-7*s, 1*s, 1*s, 'rgba(255,229,138,.22)', tw);
+      }
+    }
+  }
+
+  function drawPlaque(pl, t){
+    const x = pl.x - cam.x;
+    const y = pl.y - cam.y;
+    if(x < -60 || x > VW+60) return;
+
+    const near = nearestPlaque(helder, 54);
+    const focus = near && near.id === pl.id;
+    pl.glow = lerp(pl.glow, focus ? 1 : 0, 0.08);
+
+    pxRect(x+12, y-34, 4, 34, 'rgba(255,255,255,.07)', 1);
+
+    const boardA = pl.read ? 'rgba(116,255,213,.12)' : 'rgba(255,179,217,.12)';
+    pxRect(x+2, y-46, 24, 14, boardA, 1);
+    pxStrokeRect(x+2, y-46, 24, 14, 'rgba(255,255,255,.10)', 1);
+
+    pxRect(x+6, y-42, 14, 2, 'rgba(255,255,255,.12)', 1);
+    pxRect(x+6, y-39, 12, 2, 'rgba(255,255,255,.08)', 1);
+
+    if(!pl.read){
+      const tw = (Math.sin(t*0.01 + pl.id)*0.5+0.5);
+      pxRect(x+12, y-52, 1, 1, 'rgba(255,229,138,.95)', 0.28 + 0.58*tw + 0.2*pl.glow);
+      if(cuteMode) pxRect(x+13, y-52, 1, 1, 'rgba(116,255,213,.85)', 0.18 + 0.35*tw*pl.glow);
+    }
+
+    if(pl.glow>0.02){
+      pxRect(x-6, y-54, 38, 30, 'rgba(255,229,138,.03)', 0.55*pl.glow);
+      pxRect(x-8, y-56, 42, 34, 'rgba(116,255,213,.02)', 0.50*pl.glow);
+    }
+  }
+
+  function drawPortal(t){
+    const P = exterior.portal;
+    const x = P.x - cam.x;
+    const y = P.y - cam.y;
+    if(x+P.w < -120 || x > VW+120) return;
+
+    // base de pedras
+    pxRect(x+40, y-80, P.w-80, 80, 'rgba(255,255,255,.05)', 1);
+    pxStrokeRect(x+40, y-80, P.w-80, 80, 'rgba(255,255,255,.10)', 1);
+
+    // arco (vines)
+    pxRect(x+72, y-170, P.w-144, 90, 'rgba(47,174,120,.08)', 1);
+    pxRect(x+92, y-190, P.w-184, 30, 'rgba(116,255,213,.06)', 1);
+
+    // “janela” do portal
+    const tw = 0.35 + 0.35*(Math.sin(t*0.012)*0.5+0.5);
+    const active = portalUnlocked ? 1 : 0.55;
+
+    pxRect(x+110, y-156, P.w-220, 116, 'rgba(10,16,22,.50)', 1);
+    pxRect(x+110, y-156, P.w-220, 116, 'rgba(116,255,213,.05)', active);
+    pxRect(x+110, y-156, P.w-220, 116, 'rgba(255,179,217,.03)', active*0.8);
+
+    // brilho
+    if(cuteMode){
+      pxRect(x+90, y-180, P.w-180, 170, 'rgba(255,229,138,.02)', tw*active);
+      pxRect(x+86, y-186, P.w-172, 184, 'rgba(116,255,213,.02)', tw*active);
+    }
+
+    // Ícone “↓” quando desbloqueado (bem visível)
+    if(portalUnlocked){
+      const ix = x + P.w/2;
+      const iy = y - 210;
+      const pulse = 0.45 + 0.45*(Math.sin(t*0.012)*0.5+0.5);
+      pxRect(ix-18, iy-12, 36, 22, 'rgba(10,14,22,.52)', 1);
+      pxStrokeRect(ix-18, iy-12, 36, 22, 'rgba(255,255,255,.12)', 1);
+
+      pxRect(ix-2, iy-6, 4, 2, 'rgba(238,247,255,.60)', 1);
+      pxRect(ix-1, iy-4, 2, 8, 'rgba(238,247,255,.60)', 1);
+      pxRect(ix-5, iy+3, 10, 2, 'rgba(238,247,255,.42)', 1);
+
+      pxRect(ix-26, iy-22, 52, 44, 'rgba(255,229,138,.03)', pulse);
+      pxRect(ix-28, iy-24, 56, 48, 'rgba(116,255,213,.02)', pulse);
+    }
+  }
+
+  function drawGladeObjects(t){
+    const s = interior.spots;
+    const ox = -cam.x, oy = -cam.y;
+
+    // lago (água com “shimmer”)
+    const tw = 0.35 + 0.35*(Math.sin(t*0.012)*0.5+0.5);
+    pxRect(s.pond.x+ox, s.pond.y-56+oy, s.pond.w, 56, 'rgba(116,255,213,.06)', 1);
+    pxRect(s.pond.x+ox+12, s.pond.y-46+oy, s.pond.w-24, 40, 'rgba(255,229,138,.03)', 1);
+    if(cuteMode){
+      pxRect(s.pond.x+ox-20, s.pond.y-86+oy, s.pond.w+40, 100, 'rgba(255,255,255,.02)', tw);
+    }
+
+    // tronco
+    pxRect(s.stump.x+ox, s.stump.y-70+oy, s.stump.w, 70, 'rgba(255,255,255,.05)', 1);
+    pxStrokeRect(s.stump.x+ox, s.stump.y-70+oy, s.stump.w, 70, 'rgba(255,255,255,.10)', 1);
+    pxRect(s.stump.x+ox+14, s.stump.y-58+oy, s.stump.w-28, 12, 'rgba(255,229,138,.04)', 1);
+
+    // arco de folhas
+    pxRect(s.arch.x+ox, s.arch.y-170+oy, s.arch.w, 170, 'rgba(47,174,120,.07)', 1);
+    pxStrokeRect(s.arch.x+ox, s.arch.y-170+oy, s.arch.w, 170, 'rgba(255,255,255,.10)', 1);
+
+    // árvore-mãe (grande)
+    pxRect(s.tree.x+ox+110, s.tree.y-260+oy, 60, 260, 'rgba(255,255,255,.05)', 1);
+    for(let i=0;i<34;i++){
+      const lx = s.tree.x+ox + 40 + (i%10)*18;
+      const ly = s.tree.y+oy - 320 + (i%7)*20;
+      pxRect(lx, ly, 40, 22, 'rgba(116,255,213,.05)', 1);
+      if(cuteMode && (i%6===0)) pxRect(lx+10, ly+6, 2, 2, 'rgba(255,229,138,.10)', 1);
+    }
+    // lanternas penduradas
+    for(let i=0;i<5;i++){
+      const lx = s.tree.x+ox + 70 + i*45;
+      const ly = s.tree.y+oy - 220 + Math.sin(t*0.002 + i)*6;
+      pxRect(lx, ly, 1, 30, 'rgba(255,255,255,.06)', 1);
+      const glow = 0.25 + 0.35*(Math.sin(t*0.012 + i)*0.5+0.5);
+      pxRect(lx-3, ly+28, 8, 10, 'rgba(255,229,138,.12)', 1);
+      if(cuteMode){
+        pxRect(lx-10, ly+22, 22, 22, 'rgba(255,229,138,.03)', glow);
+        pxRect(lx-12, ly+20, 26, 26, 'rgba(116,255,213,.02)', glow);
+      }
+    }
+
+    // frames (memórias)
+    function drawFrame(fr, on){
+      pxRect(fr.x+ox, fr.y-110+oy, fr.w, 110, 'rgba(255,255,255,.05)', 1);
+      pxStrokeRect(fr.x+ox, fr.y-110+oy, fr.w, 110, 'rgba(255,255,255,.10)', 1);
+      const tw2 = 0.35 + 0.35*(Math.sin(t*0.012 + fr.x)*0.5+0.5);
+      if(cuteMode && on){
+        pxRect(fr.x+ox-10, fr.y-126+oy, fr.w+20, 140, 'rgba(255,229,138,.03)', tw2);
+        pxRect(fr.x+ox-12, fr.y-128+oy, fr.w+24, 144, 'rgba(116,255,213,.02)', tw2);
+      }
+      pxRect(fr.x+ox+6, fr.y-98+oy, fr.w-12, 18, 'rgba(255,179,217,.06)', 1);
+      pxRect(fr.x+ox+10, fr.y-70+oy, fr.w-20, 10, 'rgba(116,255,213,.06)', 1);
+    }
+    const near = (r)=>aabb(helder.x,helder.y,helder.w,helder.h, r.x, r.y-210, r.w, 250);
+    drawFrame(s.frame1, near(s.frame1));
+    drawFrame(s.frame2, near(s.frame2));
+    drawFrame(s.frame3, near(s.frame3));
+
+    // protect bar
+    const p = interior.protect;
+    if(p > 0.02){
+      const ax = 26, ay = 58;
+      pxRect(ax, ay, 160, 10, 'rgba(10,14,22,.52)', 1);
+      pxStrokeRect(ax, ay, 160, 10, 'rgba(255,255,255,.10)', 1);
+      pxRect(ax+1, ay+1, 158*p, 8, 'rgba(116,255,213,.12)', 1);
+      if(cuteMode && p>0.66) pxRect(ax+1, ay+1, 158*p, 8, 'rgba(255,179,217,.08)', 0.9);
+    }
+  }
+
+  // -------------------------
+  // Cats (mesmo estilo, melhor contraste)
+  // -------------------------
+  function drawCat(cat, t){
+    const x = cat.x - cam.x;
+    const y = cat.y - cam.y;
+    if(x < -70 || x > VW+70) return;
+
+    cat.step += Math.abs(cat.vx)*0.08 + (cat.onGround ? 0.01 : 0.004);
+    const bob = cat.onGround ? Math.sin(cat.step)*1.15 : 0;
+    const dir = cat.dir;
+
+    cat.blink -= 1;
+    if(cat.blink < 0){ cat.blink = rand(60, 180); }
+    const isBlink = cat.blink < 6;
+
+    const br = Math.sin((t*0.004) + cat.breathe)*0.6;
+
+    // shadow
+    pxRect(x+6, y+cat.h+3, 14, 2, 'rgba(0,0,0,.22)', 1);
+
+    // body
+    pxRect(x+6, y+6+bob+br, 14, 10, cat.colorA, 1);
+    pxRect(x+8, y+8+bob+br, 10, 6, cat.colorB, 0.34);
+
+    // head
+    pxRect(x+4, y+2+bob, 18, 10, cat.colorA, 1);
+
+    // ears
+    const et = Math.sin((t*0.01)+cat.ear)*0.6;
+    pxRect(x+5, y+0+bob+et, 4, 4, cat.colorA, 1);
+    pxRect(x+17, y+0+bob-et, 4, 4, cat.colorA, 1);
+
+    // eyes
+    const eyeY = y+6+bob;
+    const eyeX1 = x + (dir>0 ? 9 : 11);
+    const eyeX2 = x + (dir>0 ? 14 : 16);
+    if(isBlink){
+      pxRect(eyeX1, eyeY+1, 2, 1, 'rgba(0,0,0,.32)', 1);
+      pxRect(eyeX2, eyeY+1, 2, 1, 'rgba(0,0,0,.32)', 1);
+    }else{
+      pxRect(eyeX1, eyeY, 2, 2, 'rgba(0,0,0,.40)', 1);
+      pxRect(eyeX2, eyeY, 2, 2, 'rgba(0,0,0,.40)', 1);
+      if(showDialog && cat.name==='Helder'){
+        pxRect(eyeX1+1, eyeY, 1, 1, 'rgba(255,229,138,.55)', 1);
+        pxRect(eyeX2+1, eyeY, 1, 1, 'rgba(255,229,138,.55)', 1);
+      }
+    }
+
+    // nose
+    pxRect(x + (dir>0 ? 12 : 14), y+9+bob, 1, 1, 'rgba(255,229,138,.30)', 1);
+
+    // tail
+    const wag = Math.sin((t*0.01)+cat.tail) * 1.2;
+    const tailX = x + (dir>0 ? 2 : 20);
+    pxRect(tailX, y+8+bob+wag*0.25, 4, 2, cat.colorA, 1);
+    pxRect(tailX + (dir>0? -1:1), y+6+bob+wag*0.55, 3, 2, cat.colorA, 1);
+
+    // blush
+    if(cat.blush>0.02 && cuteMode){
+      const a = 0.12 + 0.22*cat.blush;
+      pxRect(x+7, y+8+bob, 2, 1, 'rgba(255,179,217,.75)', a);
+      pxRect(x+17,y+8+bob, 2, 1, 'rgba(255,179,217,.75)', a);
+    }
+
+    // scarf
+    if(cuteMode){
+      const scarf = (cat.name==='Carol') ? 'rgba(255,229,138,.10)' : 'rgba(185,182,255,.10)';
+      pxRect(x+6, y+12+bob, 14, 2, scarf, 1);
+      pxRect(x+10, y+14+bob, 4, 3, scarf, 1);
+    }
+
+    // Helder sparkle
+    if(cat.name==='Helder' && cuteMode){
+      const tw = (Math.sin(t*0.02)*0.5+0.5);
+      const sA = 0.10 + 0.40*cat.sparkle*tw;
+      pxRect(x+12, y-4+bob, 1, 1, 'rgba(116,255,213,.9)', sA*0.35);
+      pxRect(x+13, y-5+bob, 1, 1, 'rgba(255,229,138,.9)', sA*0.28);
+    }
+  }
+
+  // -------------------------
+  // Vignette + Bloom + Rumble
+  // -------------------------
+  function drawVignette(){
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = 'rgba(0,0,0,.42)';
+    ctx.fillRect(0,0,VW,14);
+    ctx.fillRect(0,VH-14,VW,14);
+    ctx.fillRect(0,0,14,VH);
+    ctx.fillRect(VW-14,0,14,VH);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawBloom(){
+    if(!cuteMode) return;
+    if(cam.bloom <= 0.01) return;
+    const a = cam.bloom;
+    cam.bloom = Math.max(0, cam.bloom - 0.015);
+    pxRect(0,0,VW,VH,'rgba(255,179,217,.03)', a);
+    pxRect(0,0,VW,VH,'rgba(116,255,213,.02)', a*0.95);
+    pxRect(0,0,VW,VH,'rgba(255,229,138,.02)', a*0.75);
+  }
+
+  function applyRumble(){
+    if(cam.rumble <= 0.01) return {dx:0,dy:0};
+    const a = cam.rumble;
+    cam.rumble = Math.max(0, cam.rumble - 0.03);
+    const dx = (Math.random()-0.5) * 2.2 * a;
+    const dy = (Math.random()-0.5) * 1.6 * a;
+    return {dx,dy};
+  }
+
+  // -------------------------
+  // UI update
+  // -------------------------
+  function sceneLabel(){ return scene === SCENE.OUT ? 'Floresta' : 'Clareira'; }
+  function updateUI(){
+    const W = worldNow();
+    const pct = clamp((helder.x / Math.max(1,(W.w - 240))) * 100, 0, 100);
+    barFill.style.width = pct.toFixed(1) + '%';
+
+    const extra = (scene === SCENE.IN) ? ` • Proteção: ${(interior.protect*100)|0}%` : '';
+    miniText.textContent = `Placas: ${readCount} / ${PLAQUES.length} • Corações: ${helder.hearts} • Cena: ${sceneLabel()}${extra}`;
+  }
+
+  // -------------------------
+  // Loop
+  // -------------------------
+  let last = performance.now();
+  let t = 0;
+
+  function loop(now){
+    const dt = clamp(now - last, 8, 40);
+    last = now;
+    t += dt;
+
+    if(audioOn){
+      musicTimer += dt;
+      const step = (scene === SCENE.IN ? 360 : 420);
+      if(musicTimer >= step){
+        musicTimer = 0;
+        const n = musicPattern[musicIndex++ % musicPattern.length];
+        beep(n.f, n.d, n.t, n.g);
+      }
+    }
+
+    if(pressed.has('r')) restart();
+
+    updatePlayer(dt);
+    updateCarol(dt);
+
+    // camera
+    const W = worldNow();
+    const targetX = clamp(helder.x - VW*0.42, 0, W.w - VW);
+    cam.x = lerp(cam.x, targetX, 0.08);
+
+    const targetY = clamp((helder.y - VH*0.62), -40, 140);
+    cam.y = lerp(cam.y, targetY, 0.05);
+
+    // fade
+    cam.fade = lerp(cam.fade, cam.fadeTo, 0.08);
+    if(cam.fadeTo > 0.98 && cam.fade > 0.96 && cam.nextScene){
+      const next = cam.nextScene;
+      cam.nextScene = null;
+      switchScene(next);
+      cam.fadeTo = 0;
+    }
+
+    // rumble offsets
+    const r = applyRumble();
+    ctx.setTransform(DPR,0,0,DPR,Math.round(r.dx),Math.round(r.dy));
+    ctx.imageSmoothingEnabled = false;
+
+    // render backgrounds
+    if(scene === SCENE.OUT) drawForestBackdrop(t);
+    else drawGladeBackdrop(t);
+
+    // particles behind
+    drawParticles(t);
+
+    // platforms
+    for(const p of platformsNow()) drawPlatform(p, t);
+
+    // flora + props
+    if(scene === SCENE.OUT){
+      drawFlora(exterior.flora, t);
+      for(const pl of exterior.plaques) drawPlaque(pl, t);
+      drawPortal(t);
+
+      // hint near plaques
+      const near = nearestPlaque(helder, 54);
+      if(near && !showDialog && !letterOpen){
+        const hx = near.x - cam.x + 10;
+        const hy = near.y - cam.y - 68;
+        const pulse = (Math.sin(t*0.01)*0.5+0.5);
+        pxRect(hx-20, hy-10, 92, 16, 'rgba(10,14,22,.48)', 1);
+        pxStrokeRect(hx-20, hy-10, 92, 16, 'rgba(255,255,255,.10)', 1);
+        pxRect(hx-12, hy-5, 1, 1, 'rgba(255,229,138,.95)', 0.25+0.5*pulse);
+        // “↓ ler”
+        pxRect(hx-6, hy-6, 4, 2, 'rgba(238,247,255,.55)', 1);
+        pxRect(hx-5, hy-4, 2, 6, 'rgba(238,247,255,.55)', 1);
+        pxRect(hx+8, hy-4, 14, 2, 'rgba(238,247,255,.45)', 1);
+        pxRect(hx+8, hy-1, 12, 2, 'rgba(238,247,255,.32)', 1);
+      }
+    }else{
+      drawFlora(interior.flora, t);
+      drawGladeObjects(t);
+
+      if(!showDialog && !letterOpen){
+        const dx = Math.abs((helder.x+helder.w/2)-(carol.x+carol.w/2));
+        if(dx < 62){
+          pxRect(22, VH-64, 260, 34, 'rgba(10,14,22,.48)', 1);
+          pxStrokeRect(22, VH-64, 260, 34, 'rgba(255,255,255,.10)', 1);
+          pxRect(34, VH-52, 1, 1, 'rgba(255,229,138,.95)', 0.55);
+          // “C cuddle”
+          pxRect(52, VH-54, 10, 2, 'rgba(238,247,255,.42)', 1);
+          pxRect(52, VH-50, 12, 2, 'rgba(238,247,255,.32)', 1);
+        }
+      }
+    }
+
+    // critters (vivo!)
+    updateAndDrawCritters(t, dt);
+
+    // cats
+    drawCat(carol, t);
+    drawCat(helder, t);
+
+    drawBloom();
+    drawVignette();
+
+    if(cam.fade > 0.02){
+      pxRect(0,0,VW,VH,'rgba(0,0,0,.75)', cam.fade);
+    }
+
+    updateUI();
+    pressed.clear();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  window.addEventListener('touchmove', (e)=>e.preventDefault(), {passive:false});
+})();
+</script>
+</body>
+</html>
